@@ -1,0 +1,379 @@
+{% extends "basebs.html" %}
+
+{% block heading %}
+
+    <script>
+          $(function () {
+              $(document).ready(function () {
+
+                  var idparroquia=0;
+
+                  function buscar(){
+                       location.href = "/parroquia?acc={{ permisopcion.id }}";
+                  }
+
+
+
+                  var tablaparroquia=new DataTable('#tablaparroquia', {
+                   language: {
+                        "lengthMenu": "Mostrar _MENU_ registros",
+                        "zeroRecords": "No existe información",
+                        "info": "Mostrando _PAGE_ de _PAGES_",
+                        "infoEmpty": "Sin datos",
+                        "infoFiltered": "(Filtrando de un total de _MAX_ registros)",
+                        "search": "Buscar",
+                        "paginate": {
+                            "previous": "Anterior",
+                            "next": "Siguiente"
+                        }
+                   },
+                   ajax: {
+                        url: '/parroquia',
+                        type: 'POST',
+                        data: function (d) {
+                            d.action = 'serverSide';
+                        }
+                    },
+                    columns: [
+                         { data: 'provincia',"orderable": true },
+                         { data: 'canton',"orderable": true },
+                         { data: 'parroquia',"orderable": true },
+                         { data: 'estado',"orderable": true },
+                         { data: 'acciones',type: 'html' }
+                    ],
+                    processing: true,
+                    serverSide: true,
+                    fixedHeader: true,
+                    searching: true,
+		            search: true,
+		            info: false,
+                    initComplete: function () {
+                        var table = this.api();
+                        $('#' + 'tablaparroquia' + '_filter').parent().addClass('d-none');
+                        $('.filtro-columna', table.table().header()).each(function () {
+                            var columnIndex = $(this).index();
+                            if(! $(this).hasClass('sin-filtrado')){
+                                var html = $('<input type="text" class="form-control form-control-sm form-control-filter" placeholder="Filtrar..."/>')
+                                .on('keyup change', function () {
+                                    table.column(columnIndex).search($(this).val()).draw();
+                                });
+
+                                $(this).html(html);
+                            }
+
+                        });
+
+                       table.columns.adjust();
+                    }
+                });
+
+                $("#cmbcanton").select2({
+                       width: "100%",
+                       dropdownParent: $('#ventanaparroquia'),
+                       ajax: {
+                            type: "POST",
+                            url: "/parroquia",
+                            dataType: 'json',
+                            delay: 250,
+                            data: function (params) {
+                                return {
+                                    q: params.term, // search term
+                                    page: params.page,
+                                    action: "cantones",
+
+                                };
+                            },
+                            processResults: function (data, params) {
+                                // parse the results into the format expected by Select2
+                                // since we are using custom formatting functions we do not need to
+                                // alter the remote JSON data, except to indicate that infinite
+                                // scrolling can be used
+                                params.page = params.page || 1;
+
+                                return {
+                                    results: data.items,
+                                    pagination: {
+                                        more: (params.page * 30) < data.total_count
+                                    }
+                                };
+                            },
+                            cache: true
+                        },
+
+                        minimumInputLength: 2,
+                        templateResult: formatRepo,
+                        templateSelection: formatRepoSelection,
+                        placeholder: "Buscar Cantón",
+                        language: {
+                            inputTooShort: function () {
+                                return 'Ingrese un nombre';
+                            },
+                            searching: function () {
+                                return "Buscando Cantón...";
+                            },
+                            noResults: function () {
+                                return "No se encontró información";
+                            }
+                        }
+                    });
+
+                    function formatRepo(repo) {
+                            if (repo.loading) {
+                                return repo.text;
+                            }
+
+                            var $container = $(
+                                "<div class='select2-result-repository clearfix'>" +
+                                "<div class='select2-result-repository__meta'>" +
+                                "<div class='select2-result-repository__description'></div>" +
+                                "</div>" +
+                                "</div>"
+                            );
+
+                        $container.find(".select2-result-repository__description").text(repo.nombre);
+
+                        return $container;
+                    }
+
+                    function formatRepoSelection(repo) {
+
+                        return repo.nombre || repo.text;
+                    }
+
+
+
+                  $("#btnagregar").click(function() {
+                       $("#tituloventana").html("Ingresar Parroquia");
+
+                       $("#ventanaparroquia").modal({backdrop: 'static', keyboard: false});
+                       $("#ventanaparroquia").modal("show");
+                  });
+
+
+                  $('#frmingresoparroquia').on('submit', function(e) {
+                      e.preventDefault();
+                      Loader.open();
+                      var mensapresentacion= idparroquia==0 ? 'Se ingreso correctamente' : 'Se actualizo correctamente'
+                      var formData = new FormData(this);
+                      formData.append('action', 'agregar');
+                      formData.append('id',  idparroquia);
+                      $.ajax({
+                         url: '/parroquia',
+                         type: "POST",
+                         contentType: false,
+                         data: formData,
+                         processData: false,
+                         cache: false,
+                         success: function (data) {
+                             if (data.result == "ok") {
+
+                                 swal("! Parroquia", mensapresentacion, "success").then((result) => {
+                                         buscar();
+                                  });
+
+                             } else {
+                                 swal("Error", data.message, "error");
+                             }
+                         },
+                         error: function (xhr, ajaxOptions, thrownError) {
+                             swal("Error", "Error Conexion en el Servidor", "error");
+                         },
+                         complete: function(){
+                             Loader.close();
+                         }
+
+                      });
+
+                  });
+
+                  $("#btncancelar").click(function() {
+                     document.getElementById("frmingresoparroquia").reset();
+                     $("#ventanaparroquia").modal('hide');
+                  });
+
+
+                  editar=function (idparro){
+
+                         $("#tituloventana").html("Actualizar Parroquia");
+
+                         idparroquia=idparro;
+                         var txtcanton="";
+                         $.post("/parroquia", {
+                             "action": "buscardata",
+                              "id":idparroquia
+                         }, function (data) {
+
+                             if (data.result == 'ok') {
+
+                                 $("#txtnombre").val(data.parroquia[0].nombre);
+                                 $("#cmbestado").val(parseInt(data.parroquia[0].estado));
+                                 for (var x in data.cantones) {
+                                  txtcanton = txtcanton + '<option  value="' + data.cantones[x].id + '"> ' + data.cantones[x].nombre + '</option>';
+                                 }
+
+                             }else{
+                                  swal("Error", data.message, "error");
+                             }
+
+                         }, 'json').always(function(data) {
+                               $("#cmbcanton").html(txtcanton);
+                               $("#cmbcanton").val(parseInt(data.parroquia[0].canton));
+                               $('#cmbcanton').trigger('change.select2');
+
+                               $("#ventanaparroquia").modal({backdrop: 'static', keyboard: false});
+                               $("#ventanaparroquia").modal("show");
+
+                         });
+                  }
+
+                  eliminarParroquia = function (id,nombre) {
+
+                      swal({
+                        title: '¿Está seguro que desea eliminar la parroquia?',
+                        text: "Parroquia : "+nombre,
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Si,Eliminar!',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonClass: 'btn btn-success me-2',
+                        cancelButtonClass: 'btn btn-danger ',
+                        buttonsStyling: false,
+                        allowOutsideClick: false
+
+                        }).then(function (isConfirm) {
+
+                                if (isConfirm['dismiss']!='cancel' && isConfirm['dismiss']!='esc') {
+
+                                    Loader.open();
+                                    var formData = new FormData();
+                                    formData.append('action', 'eliminar');
+                                    formData.append('id', id);
+
+                                    $.ajax({
+                                        url: '/parroquia',
+                                        type: "POST",
+                                        contentType: false,
+                                        data: formData,
+                                        processData: false,
+                                        cache: false,
+                                        success: function (data) {
+                                            if (data.result == "ok") {
+                                                swal("! Parroquia","Se eliminó correctamente", "success").then((result) => {
+                                                 buscar();
+                                                });
+
+                                            } else {
+                                                swal("Error", data.message, "error");
+
+                                            }
+
+                                        }, error: function (xhr, ajaxOptions, thrownError) {
+                                            swal("Error", "Error Conexion en el Servidor", "error");
+
+                                        },
+
+                                        complete: function () {
+                                             Loader.close();
+                                        }
+                                    });
+
+                                }
+                      })
+
+
+                  }
+
+
+
+              });
+          });
+    </script>
+
+{% endblock %}
+
+{% block canvas %}
+
+    <div class="col-sm-12">
+         <div class="card">
+            <div class="card-header d-flex justify-content-between">
+               <div class="header-title">
+                  <h4 class="card-title">Listado de Parroquias</h4>
+               </div>
+            </div>
+            <div class="card-body">
+                <div class="row d-flex justify-content-end">
+                    <div class="col-sm-4 col-md-4 col-lg-4">
+                        <button type="button" class="btn btn-primary" id="btnagregar">Agregar</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table id="tablaparroquia" class="table table-striped"   >
+                 <thead>
+                    <tr>
+                       <th >Provincia</th>
+                       <th >Cantón</th>
+                       <th >Parroquia</th>
+                       <th>Estado</th>
+                       <th style="align-content: center">...</th>
+                    </tr>
+
+                     <tr>
+                        <th class="filtro-columna filtro-provincia"></th>
+                        <th class="filtro-columna filtro-canton"></th>
+                        <th class="filtro-columna filtro-nombre"></th>
+                        <th class="filtro-columna sin-filtrado"></th>
+                        <th class="filtro-columna sin-filtrado"></th>
+                    </tr>
+
+
+                 </thead>
+                 <tbody>
+                 </tbody>
+              </table>
+                </div>
+            </div>
+         </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="ventanaparroquia" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="tituloventana" >Ingresar Parroquia</h5>
+          </div>
+          <div class="modal-body">
+             <div class="card-body">
+               <form id="frmingresoparroquia"  method="post">
+
+                     <div class="form-group">
+                        <label class="form-label">Cantón</label>
+                        <select id="cmbcanton" name="cmbcanton" class="form-select form-select-lg shadow-none" required >
+                             <option value="">Seleccionar el cantón</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="nombre">Nombre:</label>
+                        <input type="text" class="form-control" id="txtnombre" name="txtnombre"  autocomplete="off" required >
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Estado</label>
+                        <select id="cmbestado" name="cmbestado" class="form-select form-select-lg shadow-none">
+                            <option value="1">Activo</option>
+                            <option value="2">Inactivo</option>
+                        </select>
+                    </div>
+                   <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="btncancelar">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btnguardar">Guardar</button>
+                  </div>
+               </form>
+             </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+{% endblock %}

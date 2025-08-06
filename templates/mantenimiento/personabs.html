@@ -1,0 +1,1218 @@
+{% extends "basebs.html" %}
+
+{% block heading %}
+
+    <script>
+          $(function () {
+
+              $(document).ready(function () {
+
+                  var idpersona=0;
+                  const inputFile = document.getElementById('imglogo');
+                  const btnQuitar = document.getElementById('btn-quitar-img');
+                  const previewImg = document.getElementById('preview');
+                  const imagenPorDefecto = "../../sireca/static/assets/images/avatars/01.png";
+                  const nombreArchivoValido = /^[a-zA-Z0-9_.\-]+$/;
+               
+                  function buscar(){
+                       location.href = "/persona?acc={{ permisopcion.id }}";
+                  }
+
+                  function validarCedula(numerocedula, val) {
+
+                         if (val !=1) {
+                             return 0;
+                         } else {
+                             var cad = numerocedula;
+                             var total = 0;
+                             var longitud = cad.length;
+                             var longcheck = longitud - 1;
+
+                             if (cad !== "" && longitud === 10) {
+                                 for (i = 0; i < longcheck; i++) {
+                                     if (i % 2 === 0) {
+                                         var aux = cad.charAt(i) * 2;
+                                         if (aux > 9) aux -= 9;
+                                         total += aux;
+                                     } else {
+                                         total += parseInt(cad.charAt(i)); // parseInt o concatenará en lugar de sumar
+                                     }
+                                 }
+
+                                 total = total % 10 ? 10 - total % 10 : 0;
+                                 if (cad.charAt(longitud - 1) == total) {
+                                     return 0;
+                                 } else {
+                                     return 1;
+                                 }
+                             }
+                         }
+
+                     }
+
+                 $("#txtidentificacion").blur(function () {
+
+                    if (validarCedula($("#txtidentificacion").val(), $("#cmbidetificacion").val()) != 0) {
+                         swal("Error", "Número de Cédula Incorrecta", "error");
+                         $("#txtidentificacion").val("");
+                     } else {
+                         $.post("/persona", {
+                             "action": "validaridentificacion",
+                             identificacion: $("#txtidentificacion").val(),
+                             idcarrera: $("#cmbcarrera").val()
+                         }, function (data) {
+                             if (data.result == 'bad') {
+                                 swal("Error", data.message, "error");
+                                 $("#txtidentificacion").val("");
+                             }
+                         }, 'json');
+                     }
+
+                });
+                 
+
+                  var tablapersona=new DataTable('#tablapersona', {
+                   language: {
+                        "lengthMenu": "Mostrar _MENU_ registros",
+                        "zeroRecords": "No existe información",
+                        "info": "Mostrando _PAGE_ de _PAGES_",
+                        "infoEmpty": "Sin datos",
+                        "infoFiltered": "(Filtrando de un total de _MAX_ registros)",
+                        "search": "Buscar",
+                        "paginate": {
+                            "previous": "Anterior",
+                            "next": "Siguiente"
+                        }
+                   },
+                   ajax: {
+                        url: '/persona',
+                        type: 'POST',
+                        data: function (d) {
+                            d.action = 'serverSide';
+                        }
+                    },
+                    columns: [
+                         { data: 'nombre',"orderable": true },
+                         { data: 'usuario',"orderable": true },
+                         { data: 'identificacion',"orderable": true },
+                         { data: 'telefono',"orderable": true },
+                         { data: 'fechaingreso',"orderable": true },
+                         { data: 'perfiles',"orderable": true },
+                         { data: 'estado',"orderable": true },
+                         { data: 'acciones',type: 'html' }
+                    ],
+                    processing: true,
+                    serverSide: true,
+                    fixedHeader: true,
+                    searching: true,
+                    paging: true,
+                   search: true,
+                   info: false,
+
+                    initComplete: function () {
+                        var table = this.api();
+                        $('#' + 'tablapersona' + '_filter').parent().addClass('d-none');
+                        $('.filtro-columna', table.table().header()).each(function () {
+                            var columnIndex = $(this).index();
+                            if(! $(this).hasClass('sin-filtrado')){
+                                var html = $('<input type="text" class="form-control form-control-sm form-control-filter" placeholder="Filtrar..."/>')
+                                .on('keyup change', function () {
+                                    table.column(columnIndex).search($(this).val()).draw();
+                                });
+
+                                $(this).html(html);
+                            }
+
+                        });
+
+                       table.columns.adjust();
+
+
+                    }
+
+                });
+
+
+                  $("#btnagregar").click(function() {
+                       $("#tituloventana").html("Ingresar Persona");
+
+                       $("#cmbgrupo").select2({
+                           theme: "classic",
+                           dropdownParent: $('#ventanapersona'),
+                           ajax: {
+                                type: "POST",
+                                url: "/persona",
+                                dataType: 'json',
+                                delay: 250,
+                                data: function (params) {
+                                    return {
+                                        q: params.term, // search term
+                                        page: params.page,
+                                        action: "grupos",
+
+                                    };
+                                },
+                                processResults: function (data, params) {
+                                    // parse the results into the format expected by Select2
+                                    // since we are using custom formatting functions we do not need to
+                                    // alter the remote JSON data, except to indicate that infinite
+                                    // scrolling can be used
+                                    params.page = params.page || 1;
+
+                                    return {
+                                        results: data.items,
+                                        pagination: {
+                                            more: (params.page * 30) < data.total_count
+                                        }
+                                    };
+                                },
+                                cache: true
+                            },
+
+                            minimumInputLength: 2,
+                            templateResult: formatRepo,
+                            templateSelection: formatRepoSelection,
+                            placeholder: "Buscar Grupos",
+                            language: {
+                                inputTooShort: function () {
+                                    return 'Ingrese un nombre';
+                                },
+                                searching: function () {
+                                    return "Buscando Grupos...";
+                                },
+                                noResults: function () {
+                                    return "No se encontró información";
+                                }
+                            }
+                        });
+
+                       $("#cmbperfil").select2({ theme: "classic",
+                           dropdownParent: $('#ventanapersona')
+                       });
+                       
+
+                        function formatRepo(repo) {
+                                if (repo.loading) {
+                                    return repo.text;
+                                }
+
+                                var $container = $(
+                                    "<div class='select2-result-repository clearfix'>" +
+                                    "<div class='select2-result-repository__meta'>" +
+                                    "<div class='select2-result-repository__description'></div>" +
+                                    "</div>" +
+                                    "</div>"
+                                );
+
+                            $container.find(".select2-result-repository__description").text(repo.nombre);
+
+                            return $container;
+                        }
+
+                        function formatRepoSelection(repo) {
+
+                            return repo.nombre || repo.text;
+                        }
+
+
+
+                       $("#ventanapersona").modal({backdrop: 'static', keyboard: false});
+                       $("#ventanapersona").modal("show");
+                  });
+                  
+                  function elimimarfeedback(tabSelector) {                       
+                        const tab = document.querySelector(tabSelector);
+                        const fields = tab.querySelectorAll('input[required], select[required], textarea[required]');
+                        for (let field of fields) {
+                            field.classList.remove("is-invalid");
+                            let feedback = field.parentElement.querySelector('.invalid-feedback');
+                            if (feedback) {
+                                feedback.textContent = "";
+                                feedback.style.display = 'none';
+                            }                             
+                        }   
+                        return true
+                  }
+                  
+                  function validarCamposDeTab(tabSelector) {                       
+                        const tab = document.querySelector(tabSelector);
+                        const fields = tab.querySelectorAll('input[required], select[required], textarea[required]');
+                        let valido = true;
+                    
+                        for (let field of fields) {
+                            const isVisible = field.offsetParent !== null;
+                    
+                            if (isVisible && (!field.value || field.value === "0")) {
+                                field.classList.add("is-invalid");
+                    
+                                let feedback = field.parentElement.querySelector('.invalid-feedback');
+                                if (!feedback) {
+                                    feedback = document.createElement('div');
+                                    feedback.className = 'invalid-feedback';
+                                    field.parentElement.appendChild(feedback);
+                                }
+                    
+                                feedback.textContent = "Este campo es obligatorio.";
+                                feedback.style.display = 'block';
+                    
+                                setTimeout(() => field.focus(), 300);  // evitar error de no focusable
+                                valido = false;
+                                break;
+                            } else {
+                                field.classList.remove("is-invalid");
+                                const feedback = field.parentElement.querySelector('.invalid-feedback');
+                                if (feedback) {
+                                    feedback.textContent = "";
+                                    feedback.style.display = 'none';
+                                }
+                            }
+                        }
+                    
+                        return valido;
+                  }
+
+                  function validarTabsEnOrden(...tabs) {
+                        for (let tabId of tabs) {
+                            const tabLink = document.querySelector(`button[data-bs-target="${tabId}"]`);
+                            if (tabLink) {
+                                const tab = new bootstrap.Tab(tabLink);
+                                tab.show();
+                            } else {
+                                console.warn(`No se encontró tab link para ${tabId}`);
+                             }      
+                            if (!validarCamposDeTab(tabId)) {
+                                return false;
+                            }                         
+                        }
+                        return true;
+                  }
+                  
+                  function EliminarTabsEnOrden(...tabs) {
+                        for (let tabId of tabs) {
+                           elimimarfeedback(tabId)                             
+                        }
+                        return true;
+                  }
+
+
+                  $('#frmingresopersona').on('submit', function(e) {
+                      e.preventDefault();
+                      if (validarTabsEnOrden('#datospersonal','#datosnacimiento','#datosresidencia','#datoscontacto')) {
+                          Loader.open();
+                          const formData = new FormData(this);
+                          formData.append('action', 'agregar');
+                          formData.append('id', 0);
+                          
+                          $.ajax({
+                              url: '/persona',
+                              type: "POST",
+                              contentType: false,
+                              data: formData,
+                              processData: false,
+                              cache: false,
+                              success: function (data) {
+                                  if (data.result == "ok") {
+
+                                      swal("! Persona", "Se ingreso correctamente", "success").then((result) => {
+                                          buscar();
+                                      });
+
+                                  } else {
+                                      swal("Error", data.message, "error");
+                                  }
+                              },
+                              error: function (xhr, ajaxOptions, thrownError) {
+                                  swal("Error", "Error Conexion en el Servidor", "error");
+                              },
+                              complete: function () {
+                                  Loader.close();
+                              }
+
+                          });
+                      }
+                  });
+
+                  $("#btncancelar").click(function() {
+                     document.getElementById("frmingresopersona").reset();
+                     EliminarTabsEnOrden('#datospersonal','#datosnacimiento','#datosresidencia','#datoscontacto');                       
+                     $("#ventanapersona").modal('hide');
+                  });
+
+
+                  editar=function (idperson){
+
+                         $("#tituloventana").html("Actualizar Persona");
+
+                         idpersona=idperson;
+                         $.post("/persona", {
+                             "action": "buscardata",
+                              "id":idpersona
+                         }, function (data) {
+
+                             if (data.result == 'ok') {
+
+
+                                 $("#txtnombre").val(data.perfil[0].nombre);
+                                 $("#cmbestado").val(parseInt(data.perfil[0].estado));
+
+
+                             }else{
+                                  swal("Error", data.message, "error");
+                             }
+
+                         }, 'json').always(function() {
+
+                               $("#ventanapersona").modal({backdrop: 'static', keyboard: false});
+                               $("#ventanapersona").modal("show");
+
+                         });
+                  }
+
+                  eliminarpersona = function (id,nombre) {
+
+                      swal({
+                        title: '¿Está seguro que desea eliminar la persona?',
+                        text: "Persona : "+nombre,
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Si,Eliminar!',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonClass: 'btn btn-success me-2',
+                        cancelButtonClass: 'btn btn-danger ',
+                        buttonsStyling: false,
+                        allowOutsideClick: false
+
+                        }).then(function (isConfirm) {
+
+                                if (isConfirm['dismiss']!='cancel' && isConfirm['dismiss']!='esc') {
+
+                                    Loader.open();
+                                    var formData = new FormData();
+                                    formData.append('action', 'eliminar');
+                                    formData.append('id', id);
+
+                                    $.ajax({
+                                        url: '/persona',
+                                        type: "POST",
+                                        contentType: false,
+                                        data: formData,
+                                        processData: false,
+                                        cache: false,
+                                        success: function (data) {
+                                            if (data.result == "ok") {
+                                                swal("! Perfil","Se eliminó correctamente", "success").then((result) => {
+                                                 buscar();
+                                                });
+
+                                            } else {
+                                                swal("Error", data.message, "error");
+
+                                            }
+
+                                        }, error: function (xhr, ajaxOptions, thrownError) {
+                                            swal("Error", "Error Conexion en el Servidor", "error");
+
+                                        },
+
+                                        complete: function () {
+                                             Loader.close();
+                                        }
+                                    });
+
+                                }
+                      })
+
+
+                  }
+
+                  $("#cmbprovincia").change(function () {
+
+                     $.post("/personas", {
+                         "action": "buscarcanton",
+                         idprovincia: $("#cmbprovincia").val()
+                     }, function (data) {
+                         var cantontxtdatos = '';
+                         if (data.result == 'ok') {
+
+
+                             for (var x in data.listacantondatos) {
+                                 cantontxtdatos = cantontxtdatos + '<option  value="' + data.listacantondatos[x].id + '"> ' + data.listacantondatos[x].nombre + '</option>';
+                             }
+                             $("#cmbcanton").html(cantontxtdatos);
+
+
+                         } else {
+                             $("#cmbcanton").html(cantontxtdatos);
+
+                         }
+
+                     }, 'json');
+                  });
+
+                  
+                  $("#cmbprovinciaresidencia").change(function () {
+
+                     $.post("/personas", {
+                         "action": "buscarcanton",
+                         idprovincia: $("#cmbprovinciaresidencia").val()
+                     }, function (data) {
+                         var cantontxtdatos = '';
+                         if (data.result == 'ok') {
+
+
+                             for (var x in data.listacantondatos) {
+                                 cantontxtdatos = cantontxtdatos + '<option  value="' + data.listacantondatos[x].id + '"> ' + data.listacantondatos[x].nombre + '</option>';
+                             }
+                             $("#cmbcantonresidencia").html(cantontxtdatos);
+
+
+                         } else {
+                             $("#cmbcantonresidencia").html(cantontxtdatos);
+
+                         }
+
+                     }, 'json');
+                  });  
+                  
+                  $("#cmbcantonresidencia").change(function () {
+
+                     $.post("/personas", {
+                         "action": "buscarparroquia",
+                         idcantonresidencia: $("#cmbcantonresidencia").val()
+                     }, function (data) {
+                         var parroquiatxtdatos = '';
+                         if (data.result == 'ok') {
+
+
+                             for (var x in data.lsitaparroquia) {
+                                 parroquiatxtdatos = parroquiatxtdatos + '<option  value="' + data.lsitaparroquia[x].id + '"> ' + data.lsitaparroquia[x].nombre + '</option>';
+                             }
+                             $("#cmbparroquia").html(parroquiatxtdatos);
+
+
+                         } else {
+                             $("#cmbparroquia").html(parroquiatxtdatos);
+
+                         }
+
+                     }, 'json');
+                  });  
+                  
+                  agregarusuario = function (id,nombre) {
+                      swal({
+                        title: '¿Está seguro que desea agregar el Usuario?',
+                        text: "Persona : "+nombre,
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Si,Agregar!',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonClass: 'btn btn-success me-2',
+                        cancelButtonClass: 'btn btn-danger ',
+                        buttonsStyling: false,
+                        allowOutsideClick: false
+
+                        }).then(function (isConfirm) {
+
+                                if (isConfirm['dismiss']!='cancel' && isConfirm['dismiss']!='esc') {
+
+                                    Loader.open();
+                                    var formData = new FormData();
+                                    formData.append('action', 'agregarusuario');
+                                    formData.append('id', id);
+
+                                    $.ajax({
+                                        url: '/persona',
+                                        type: "POST",
+                                        contentType: false,
+                                        data: formData,
+                                        processData: false,
+                                        cache: false,
+                                        success: function (data) {
+                                            if (data.result == "ok") {
+                                                swal("! Persona","Se agregó correctamente el usuario", "success").then((result) => {
+                                                 buscar();
+                                                });
+
+                                            } else {
+                                                swal("Error", data.message, "error");
+
+                                            }
+
+                                        }, error: function (xhr, ajaxOptions, thrownError) {
+                                            swal("Error", "Error Conexion en el Servidor", "error");
+
+                                        },
+
+                                        complete: function () {
+                                             Loader.close();
+                                        }
+                                    });
+
+                                }
+                      })
+                  };
+                  
+                  asignarperfil = function (id,nombre) {
+                        idpersona=id;
+                        $("#txtnombper").val(nombre);
+                        $("#cmbperfilasignar").select2({
+                           theme: "classic",
+                           dropdownParent: $('#ventanasignarperfil'),
+                           ajax: {
+                                type: "POST",
+                                url: "/persona",
+                                dataType: 'json',
+                                delay: 250,
+                                data: function (params) {
+                                    return {
+                                        q: params.term, // search term
+                                        page: params.page,
+                                        idpersona:id,
+                                        action: "perfiles",
+
+                                    };
+                                },
+                                processResults: function (data, params) {
+                                    // parse the results into the format expected by Select2
+                                    // since we are using custom formatting functions we do not need to
+                                    // alter the remote JSON data, except to indicate that infinite
+                                    // scrolling can be used
+                                    params.page = params.page || 1;
+
+                                    return {
+                                        results: data.items,
+                                        pagination: {
+                                            more: (params.page * 30) < data.total_count
+                                        }
+                                    };
+                                },
+                                cache: true
+                            },
+
+                            minimumInputLength: 2,
+                            templateResult: formatRepo,
+                            templateSelection: formatRepoSelection,
+                            placeholder: "Buscar",
+                            language: {
+                                inputTooShort: function () {
+                                    return 'Ingrese un nombre';
+                                },
+                                searching: function () {
+                                    return "Buscando Perfiles...";
+                                },
+                                noResults: function () {
+                                    return "No se encontró información";
+                                }
+                            }
+                        });
+                       
+
+                        function formatRepo(repo) {
+                                if (repo.loading) {
+                                    return repo.text;
+                                }
+
+                                var $container = $(
+                                    "<div class='select2-result-repository clearfix'>" +
+                                    "<div class='select2-result-repository__meta'>" +
+                                    "<div class='select2-result-repository__description'></div>" +
+                                    "</div>" +
+                                    "</div>"
+                                );
+
+                            $container.find(".select2-result-repository__description").text(repo.nombre);
+
+                            return $container;
+                        }
+
+                        function formatRepoSelection(repo) {
+
+                            return repo.nombre || repo.text;
+                        }
+
+
+
+                       $("#ventanasignarperfil").modal({backdrop: 'static', keyboard: false});
+                       $("#ventanasignarperfil").modal("show");
+                      
+                      
+                  };
+                  
+                  $("#btncancelarasignarperfil").click(function() {
+                     document.getElementById("frmasignarperfil").reset();
+                     EliminarTabsEnOrden('#frmasignarperfil');
+                     $("#ventanasignarperfil").modal('hide');
+                  });
+                  
+                  $('#frmasignarperfil').on('submit', function(e) {
+                      e.preventDefault();
+                      if (validarTabsEnOrden('#frmasignarperfil')) {
+                          Loader.open();
+                          const formData = new FormData(this);
+                          formData.append('action', 'asignarperfil');
+                          formData.append('id', idpersona);
+                          
+                          $.ajax({
+                              url: '/persona',
+                              type: "POST",
+                              contentType: false,
+                              data: formData,
+                              processData: false,
+                              cache: false,
+                              success: function (data) {
+                                  if (data.result == "ok") {
+
+                                      swal("! Persona", "Se agregó correctamente el/los perfil(es)", "success").then((result) => {
+                                          buscar();
+                                      });
+
+                                  } else {
+                                      swal("Error", data.message, "error");
+                                  }
+                              },
+                              error: function (xhr, ajaxOptions, thrownError) {
+                                  swal("Error", "Error Conexion en el Servidor", "error");
+                              },
+                              complete: function () {
+                                  Loader.close();
+                              }
+
+                          });
+                      }
+                  });
+
+                  document.getElementById('imglogo').addEventListener('change', function (event) {
+                        const file = event.target.files[0];
+
+                        if (file.size === 0) {
+                            swal("Error", "El archivo está vacío.", "error");
+                            inputFile.value = '';
+                            return;
+                        }
+
+                         const nombre = file.name;
+                         if (!nombreArchivoValido.test(nombre)) {
+                            swal("Error", "El nombre del archivo no debe contener tildes ni caracteres especiales.", "error");
+                            inputFile.value = '';
+                            return;
+                         }
+
+                         if (file.size > 4 * 1024 * 1024) {
+                              swal("Error", "La imagen no debe superar los 2MB.", "error");
+                              inputFile.value = '';
+                              return;
+                         }
+
+                        if (file && file.type.startsWith('image/')) {
+                          const reader = new FileReader();
+                          reader.onload = function (e) {
+                            previewImg.src = e.target.result;
+                            // Oculta los temas
+                            document.querySelectorAll('.profile-img-edit img:not(#preview)').forEach(img => img.style.display = 'none');
+                            // Mostrar el botón para quitar imagen
+                            btnQuitar.style.display = 'inline-block';
+                          };
+                          reader.readAsDataURL(file);
+                        } else {
+                          swal("Error", "Solo se permiten imágenes en formato .jpg, .jpeg o .png", "error");
+                          inputFile.value = '';
+                          return;
+                        }
+
+                  });
+                  // Acción al quitar imagen
+                  btnQuitar.addEventListener('click', function () {
+                    inputFile.value = ''; // Borrar archivo seleccionado manualmente
+
+                    // Oculta el botón de quitar
+                    btnQuitar.style.display = 'none';
+
+                    if (idpersona > 0) {
+                        // Llamar al backend para eliminar el logo en el servidor
+                        $.post("/persona", {
+                            action: "eliminarlogo",
+                            id: idpersona
+                        }, function (data) {
+                            if (data.result === 'ok') {
+                                previewImg.src = imagenPorDefecto;
+                            } else {
+                                swal("Error", "No se pudo eliminar el logo del servidor.", "error");
+                            }
+                        }, 'json').always(function () {
+                            // Restaurar otras imágenes (temas) si aplica
+                            document.querySelectorAll('.profile-img-edit img:not(#preview)').forEach(img => {
+                                img.style.display = 'inline-block';
+                            });
+                        });
+
+                    } else {
+                        // Para nuevo registro, solo restaurar imagen por defecto
+                        previewImg.src = imagenPorDefecto;
+
+                        document.querySelectorAll('.profile-img-edit img:not(#preview)').forEach(img => {
+                            img.style.display = 'inline-block';
+                        });
+                    }
+                  });
+
+
+              });
+          });
+    </script>
+
+{% endblock %}
+
+{% block canvas %}
+
+    <div class="col-sm-12">
+         <div class="card">
+            <div class="card-header d-flex justify-content-between">
+               <div class="header-title">
+                  <h4 class="card-title">Listado de Personas</h4>
+               </div>
+            </div>
+            <div class="card-body">
+                <div class="row d-flex justify-content-end">
+                    <div class="col-sm-4 col-md-4 col-lg-4">
+                        <button type="button" class="btn btn-primary" id="btnagregar">Agregar</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table id="tablapersona" class="table table-striped"   >
+                 <thead>
+
+                    <tr>
+                       <th >Nombre</th>
+                       <th >Usuario</th>
+                       <th >Identificación</th>
+                       <th >Télefono</th>
+                       <th >Fecha Ingreso</th>
+                       <th >Perfil(es)</th>
+                       <th>Estado</th>
+                       <th style="align-content: center">...</th>
+                    </tr>
+
+                     <tr>
+                        <th class="filtro-columna filtro-nombre"></th>
+                        <th class="filtro-columna filtro-usuario"></th>
+                        <th class="filtro-columna filtro-identificacion"></th>
+                        <th class="filtro-columna filtro-telefono"></th>
+                        <th class="filtro-columna sin-filtrado"></th>
+                        <th class="filtro-columna sin-filtrado"></th>
+                        <th class="filtro-columna sin-filtrado"></th>
+                        <th class="filtro-columna sin-filtrado"></th>
+                    </tr>
+
+
+                 </thead>
+                 <tbody>
+                 </tbody>
+              </table>
+                </div>
+            </div>
+         </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="ventanapersona" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="tituloventana" >Ingresar Inscripción</h5>
+          </div>
+          <div class="modal-body">
+             <div class="card-body">
+               <form id="frmingresopersona" novalidate method="post">
+
+                   <ul class="nav nav-tabs" id="myTab" role="tablist">
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="datospersonal-tab" data-bs-toggle="tab" data-bs-target="#datospersonal" type="button" role="tab" aria-controls="datospersonal" aria-selected="true">Datos Personales</button>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="datosnacimiento-tab" data-bs-toggle="tab" data-bs-target="#datosnacimiento" type="button" role="tab" aria-controls="datosnacimiento" aria-selected="false">Datos de Nacimiento</button>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="datosresidencia-tab" data-bs-toggle="tab" data-bs-target="#datosresidencia" type="button" role="tab" aria-controls="datosresidencia" aria-selected="false">Datos de Residencia</button>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="datoscontacto-tab" data-bs-toggle="tab" data-bs-target="#datoscontacto" type="button" role="tab" aria-controls="datoscontacto" aria-selected="false">Datos de Contacto</button>
+                      </li>
+                     
+
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content">
+                      <div class="tab-pane active" id="datospersonal" role="tabpanel" aria-labelledby="datospersonal-tab">
+                          <div class="row">
+                                <div class="col-sm-9 col-md-9 col-lg-9">
+                                    <div class="form-group">
+                                        <label class="form-label">Empresa</label>
+                                        <select id="cmbempresapertenece" name="cmbempresapertenece"  {% if not request.user.is_superuser %} required {% endif %} class="form-select mb-3 shadow-none">
+                                             <option value="0">SELECCIONAR EMPRESA</option>
+                                             {% for xlistadoempresa in listadoempresa %}
+                                                       <option value='{{ xlistadoempresa.id }}'>{{ xlistadoempresa.nombre }}</option>
+                                             {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3 col-md-3 col-lg-3">
+                                    <div class="form-group">
+                                       <div class="profile-img-edit position-relative">
+                                          <img id="preview" src="../../sireca/static/assets/images/avatars/01.png" alt="profile-pic" class="theme-color-default-img profile-pic rounded avatar-100">
+                                          <img id="preview" src="../../sireca/static/assets/images/avatars/01.png" alt="profile-pic" class="theme-color-purple-img profile-pic rounded avatar-100">
+                                          <img id="preview" src="../../sireca/static/assets/images/avatars/01.png" alt="profile-pic" class="theme-color-blue-img profile-pic rounded avatar-100">
+                                          <img id="preview" src="../../sireca/static/assets/images/avatars/01.png" alt="profile-pic" class="theme-color-green-img profile-pic rounded avatar-100">
+                                          <img id="preview" src="../../sireca/static/assets/images/avatars/01.png" alt="profile-pic" class="theme-color-yellow-img profile-pic rounded avatar-100">
+                                          <img id="preview" src="../../sireca/static/assets/images/avatars/01.png" alt="profile-pic" class="theme-color-pink-img profile-pic rounded avatar-100">
+                                          <label for="imglogo" class="upload-icone bg-primary" style="cursor:pointer">
+                                             <svg class="upload-button icon-14" width="14"  viewBox="0 0 24 24">
+                                                <path fill="#ffffff" d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z" />
+                                             </svg>
+                                              <svg class="upload-button icon-14" width="14" viewBox="0 0 24 24">
+                                                    <path fill="#ffffff" d="M19,13H5V11H19V13Z" /> <!-- ícono de "menos" / quitar -->
+                                              </svg>
+                                             <input class="file-upload" type="file" id="imglogo" name="imglogo" accept=".jpg,.jpeg,.png"  >
+                                          </label>
+                                          <button type="button" id="btn-quitar-img"
+                                              class="upload-icone bg-danger position-absolute top-0 end-0 rounded-circle"
+                                              style="display: none; border: none; z-index: 2; transform: scale(0.8);">
+                                              <svg class="upload-button icon-14" width="14" viewBox="0 0 24 24">
+                                                <path fill="#ffffff" d="M19,13H5V11H19V13Z" />
+                                              </svg>
+                                          </button>
+
+                                       </div>
+                                       <div class="img-extension mt-3">
+                                          <div class="d-inline-block align-items-center">
+                                             <span>Solo</span>
+                                             <a href="#">.jpg</a>
+                                             <a href="#">.png</a>
+                                             <a href="#">.jpeg</a>
+                                          </div>
+                                       </div>
+                                    </div>
+                                </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-label">Tipo Identificación</label>
+                                    <select id="cmbtipoidentificacion" name="cmbtipoidentificacion" required class="form-select mb-3 shadow-none">
+                                         <option value="0">Seleccionar el tipo identificación</option>
+                                         {% for xlistatipoidentifcacion in listatipoidentifcacion %}
+                                                   <option value='{{ xlistatipoidentifcacion.id }}'>{{ xlistatipoidentifcacion.nombre }}</option>
+                                         {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-label">Identificación <a style="color: #d92550">(*)</a> :</label>
+                                    <input type="text" class="form-control" id="txtidentificacion" name="txtidentificacion" placeholder="identificación" required>
+                                </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                               <div class="col-sm-12 col-md-12 col-lg-12">
+                                    <div class="form-group">
+                                     <label class="form-label">Nombres <a style="color: #d92550">(*)</a> :</label>
+                                    <input type="text" class="form-control" id="txtnombres" name="txtnombres" placeholder="Nombres" required>
+                                </div>
+                               </div>
+                          </div>
+                          <div class="row">
+                               <div class="col-sm-6 col-md-6 col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Apellido 1 <a style="color: #d92550">(*)</a> :</label>
+                                        <input type="text" class="form-control" id="txtapellido1" name="txtapellido1" placeholder="Apellido 1" required>
+                                    </div>
+                               </div>
+                               <div class="col-sm-6 col-md-6 col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Apellido 2 <a style="color: #d92550">(*)</a> :</label>
+                                        <input type="text" class="form-control" id="txtapellido2" name="txtapellido2" placeholder="Apellido 2" required>
+                                    </div>
+                               </div>
+                          </div>
+                          <div class="row">
+                               <div class="col-sm-5 col-md-5 col-lg-5">
+                                   <div class="form-group">
+                                        <label class="form-label">Sexo <a style="color: #d92550">(*)</a> :</label>
+                                        <select id="cmbsexo" name="cmbsexo" class="form-select mb-3 shadow-none" required>
+                                            <option value="0">Seleccionar el Sexo</option>
+                                             {% for xlistasexo in listasexo %}
+                                                   <option value='{{ xlistasexo.id }}'>{{ xlistasexo.nombre }}</option>
+                                             {% endfor %}
+                                        </select>
+                                    </div>
+                               </div>
+                               <div class="col-sm-7 col-md-7 col-lg-7">
+                                    <div class="form-group">
+                                        <label class="form-label">Nacionalidad <a style="color: #d92550">(*)</a> :</label>
+                                        <select id="cmbnacionalidad" name="cmbnacionalidad" class="form-select mb-3 shadow-none" required>
+                                            <option value="0">Seleccionar la Nacionalidad</option>
+                                             {% for xlistanacionalidad in listanacionalidad %}
+                                                   <option value='{{ xlistanacionalidad.id }}'>{{ xlistanacionalidad.nombre }}</option>
+                                             {% endfor %}
+                                        </select>
+                                    </div>
+                               </div>
+
+                          </div>
+                          <div class="row">
+                               <div class="col-sm-6 col-md-6 col-lg-6">
+                                   <div class="form-group">
+                                        <label class="form-label">Estado Civil :</label>
+                                        <select id="cmbtipoestadocivil" name="cmbtipoestadocivil" class="form-select form-select mb-3 shadow-none">
+                                            <option value="0">Seleccionar el Estado Civil</option>
+                                             {% for xlistaestadocivil in listaestadocivil %}
+                                                   <option value='{{ xlistaestadocivil.id }}'>{{ xlistaestadocivil.nombre }}</option>
+                                             {% endfor %}
+                                        </select>
+                                    </div>
+                               </div>
+
+                               <div class="col-sm-6 col-md-6 col-lg-6">
+                                   <div class="form-group">
+                                        <label class="form-label">Nivel Académico :</label>
+                                        <select id="cmbnivelacademico" name="cmbnivelacademico" class="form-select form-select mb-3 shadow-none">
+                                            <option value="0">Seleccionar el Nivel Académico</option>
+                                             {% for xlistanivelacademico in listanivelacademico %}
+                                                   <option value='{{ xlistanivelacademico.id }}'>{{ xlistanivelacademico.nombre }}</option>
+                                             {% endfor %}
+                                        </select>
+                                    </div>
+                               </div>
+
+                          </div>
+
+                          <div class="row">
+                              <div class="col-sm-12 col-md-12 col-lg-12">
+                                   <div class="form-group">
+                                        <label class="form-label">Perfil <a style="color: #d92550">(*)</a> :</label>
+                                        <select id="cmbperfil" name="cmbperfil" class="form-select mb-3 shadow-none" multiple required style="width: 100%">
+                                            <option value="0">Seleccionar el Perfil</option>
+                                             {% for xlistaperfil in listaperfil %}
+                                                   <option value='{{ xlistaperfil.id }}'>{{ xlistaperfil.nombre }}</option>
+                                             {% endfor %}
+                                        </select>
+                                    </div>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="tab-pane" id="datosnacimiento" role="tabpanel" aria-labelledby="datosnacimiento-tab">
+                           <div class="row">
+                               <div class="col-sm-5 col-md-5 col-lg-5">
+                                    <div class="form-group">
+                                        <label >F. de Nacimiento<a style="color: #d92550">(*)</a> :</label>
+                                        <input type="date" class="form-control" id="dtbfechanacimiento" name="dtbfechanacimiento"  required>
+                                    </div>
+                               </div>
+                          </div>
+                          <div class="row">
+                              <div class="col-sm-6 col-md-6 col-lg-6">
+                                   <div class="form-group">
+                                        <label class="form-label">Provincia :</label>
+                                        <select id="cmbprovincia" name="cmbprovincia" class="form-select mb-3 shadow-none">
+                                            <option value="0">Seleccionar la provincia</option>
+                                             {% for xlistaprovincia in listaprovincia %}
+                                                   <option value='{{ xlistaprovincia.id }}'>{{ xlistaprovincia.nombre }}</option>
+                                             {% endfor %}
+                                        </select>
+                                    </div>
+                              </div>
+                              <div class="col-sm-6 col-md-6 col-lg-6">
+                                   <div class="form-group">
+                                        <label class="form-label">Cantón  :</label>
+                                        <select id="cmbcanton" name="cmbcanton" class="form-select mb-3 shadow-none">
+                                              <option value="0">Seleccionar el cantón</option>
+                                        </select>
+                                    </div>
+                              </div>
+                          </div>
+                          <div class="row">
+                             <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-label">Padre :</label>
+                                    <input type="text" class="form-control" id="txtnombrepadre" name="txtnombrepadre" placeholder="Nombres y Apellidos">
+                                </div>
+                             </div>
+                             <div class="col-sm-6 col-md-6 col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-label">Madre :</label>
+                                    <input type="text" class="form-control" id="txtmadre" name="txtmadre" placeholder="Nombres y Apellidos">
+                                </div>
+                             </div>
+
+                          </div>
+
+
+                      </div>
+                      <div class="tab-pane" id="datosresidencia" role="tabpanel" aria-labelledby="datosresidencia-tab">
+                          <div class="row">
+                              <div class="col-sm-12 col-md-12 col-lg-12">
+                                   <div class="form-group">
+                                        <label class="form-label">Provincia <a style="color: #d92550">(*)</a> :</label>
+                                        <select id="cmbprovinciaresidencia" name="cmbprovinciaresidencia" class="form-select mb-3 shadow-none" required>
+                                            <option value="0">Seleccionar la provincia</option>
+                                             {% for xlistaprovincia in listaprovincia %}
+                                                   <option value='{{ xlistaprovincia.id }}'>{{ xlistaprovincia.nombre }}</option>
+                                             {% endfor %}
+                                        </select>
+                                    </div>
+                              </div>
+                          </div>
+                          <div class="row">
+                               <div class="col-sm-6 col-md-6 col-lg-6">
+                                   <div class="form-group">
+                                        <label class="form-label">Cantón <a style="color: #d92550">(*)</a> :</label>
+                                        <select id="cmbcantonresidencia" name="cmbcantonresidencia" class="form-select mb-3 shadow-none" required>
+                                              <option value="0">Seleccionar el cantón</option>
+                                        </select>
+                                    </div>
+                              </div>
+                               <div class="col-sm-6 col-md-6 col-lg-6">
+                                   <div class="form-group">
+                                        <label class="form-label">Parroquia <a style="color: #d92550">(*)</a> :</label>
+                                        <select id="cmbparroquia" name="cmbparroquia" class="form-select mb-3 shadow-none" required>
+                                              <option value="0">Seleccionar la parroquia</option>
+                                        </select>
+                                    </div>
+                              </div>
+                          </div>
+                          <div class="row">
+                               <div class="col-sm-12 col-md-12 col-lg-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Calle principal <a style="color: #d92550">(*)</a> :</label>
+                                        <input type="text" class="form-control" id="txtcalleprincipal" name="txtcalleprincipal" placeholder="Calle principal" required>
+                                    </div>
+                               </div>
+                          </div>
+                          <div class="row">
+
+                              <div class="col-sm-12 col-md-12 col-lg-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Calle Secundaria :</label>
+                                        <input type="text" class="form-control" id="txtcallesecundaria" name="txtcallesecundaria" placeholder="Calle secundaria">
+                                    </div>
+                              </div>
+
+                          </div>
+                          <div class="row">
+
+                              <div class="col-sm-4 col-md-4 col-lg-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Número Domicilio  :</label>
+                                        <input type="number" class="form-control" id="txtnumdomicilio" name="txtnumdomicilio" placeholder="# Domicilio" value="0" min="0">
+                                    </div>
+                              </div>
+
+                              <div class="col-sm-8 col-md-8 col-lg-8">
+                                    <div class="form-group">
+                                        <label class="form-label">Sector :</label>
+                                        <select id="cmbsectorrsidencia" name="cmbsectorrsidencia" class="form-select mb-3 shadow-none" required>
+                                            <option value="0">Seleccionar la Sector</option>
+                                             {% for xlistasectorresidencia in listasectorresidencia %}
+                                                   <option value='{{ xlistasectorresidencia.id }}'>{{ xlistasectorresidencia.nombre }}</option>
+                                             {% endfor %}
+                                        </select>
+                                    </div>
+                              </div>
+                          </div>
+
+                      </div>
+                      <div class="tab-pane" id="datoscontacto" role="tabpanel" aria-labelledby="datoscontacto-tab">
+                         <div class="row">
+                             <div class="col-sm-6 col-md-6 col-lg-6">
+                                  <div class="form-group">
+                                     <label class="form-label">Correo Electrónico 1 :</label>
+                                    <input type="email" class="form-control" id="txtcorreo1"  name="txtcorreo1" value="" placeholder="Correo Electrónico 1">
+                                  </div>
+                             </div>
+                             <div class="col-sm-6 col-md-6 col-lg-6">
+                                   <div class="form-group">
+                                     <label class="form-label">Correo Electrónico 2 :</label>
+                                    <input type="email" class="form-control" id="txtcorreo2" name="txtcorreo2" value="" placeholder="Correo Electrónico 2">
+                                  </div>
+                             </div>
+                         </div>
+                         <div class="row">
+                             <div class="col-sm-6 col-md-6 col-lg-6">
+                                  <div class="form-group">
+                                     <label class="form-label">Correo Electrónico 3 :</label>
+                                    <input type="email" class="form-control" id="txtcorreo3" name="txtcorreo3" value="" placeholder="Correo Electrónico 3">
+                                  </div>
+                             </div>
+                             <div class="col-sm-6 col-md-6 col-lg-6">
+                                   <div class="form-group">
+                                     <label class="form-label">Teléfono Celular <a style="color: #d92550">(*)</a> :</label>
+                                    <input type="tel" class="form-control" id="txtcelular" name="txtcelular" value="" placeholder="Celular" required>
+                                  </div>
+                             </div>
+                         </div>
+                         <div class="row">
+                              <div class="col-sm-6 col-md-6 col-lg-6">
+                                   <div class="form-group">
+                                     <label class="form-label">Teléfono Fijo <a style="color: #d92550">(*)</a> :</label>
+                                    <input type="tel" class="form-control" id="txtfijo" name="txtfijo" value="" placeholder="Teléfono Fijo">
+                                  </div>
+                             </div>
+                         </div>
+                      </div>                     
+                    </div>
+
+                   <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="btncancelar">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btnguardar">Guardar</button>
+                  </div>
+               </form>
+             </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal fade" id="ventanasignarperfil" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="tituloventanasignar" >Asignar Perfiles</h5>
+          </div>
+          <div class="modal-body">
+             <div class="card-body">
+               <form id="frmasignarperfil" novalidate method="post">
+                   <div class="row">
+                       <div class="col-sm-12 col-md-12 col-lg-12">
+                           <div class="form-group">
+                                <label class="form-label">Persona :</label>
+                                 <input type="text" class="form-control" id="txtnombper" name="txtnombper" readonly>
+                           </div>    
+                       </div>   
+                   </div>
+                   <div class="row">
+                       <div class="col-sm-12 col-md-12 col-lg-12">
+                           <div class="form-group">
+                                <label class="form-label">Perfil :</label>
+                                <select id="cmbperfilasignar" name="cmbperfilasignar" class="form-select mb-3 shadow-none" multiple style="width: 100%" required>
+                                    <option value="0">Seleccionar el Perfil</option>                                     
+                                </select>
+                            </div>
+                       </div> 
+                       
+                   </div>
+                   <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="btncancelarasignarperfil">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btnguardarasignar">Guardar</button>
+                  </div>
+               </form>
+             </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+{% endblock %}

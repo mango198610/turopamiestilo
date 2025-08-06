@@ -9,11 +9,15 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
+STATIC_ROOT =  os.path.join(SITE_ROOT, 'static')
+MEDIA_ROOT = os.path.join(SITE_ROOT, 'media')
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -25,7 +29,7 @@ SECRET_KEY = 'django-insecure-&aq0@e%9$ja&)m&#m=&bro$52n@^5&&+t%&)y65p2py5bk!w^6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -44,7 +48,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -75,11 +79,17 @@ WSGI_APPLICATION = 'turopamiestilo.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+
+ 'default': {
+         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+         # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+         'NAME': 'ropaestilo',  # Or path to database file if using sqlite3.
+         'USER': 'postgres',  # Not used with sqlite3.
+         'PASSWORD': 'postgres',  # Not used with sqlite3.
+         'HOST': 'localhost',  # Set to empty string for localhost. Not used with sqlite3.
+         'PORT': '5433',  # Set to empty string for default. Not used with sqlite3.
+     }
+ }
 
 
 # Password validation
@@ -104,7 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-es'
 
 TIME_ZONE = 'UTC'
 
@@ -122,3 +132,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+LETRAS_ABECEDARIO_MIN = 'abcdfghijklmnopqrstuvwxyz'
+
+DEFAULT_PASSWORD = '123TUTIENDA'

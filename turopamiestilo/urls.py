@@ -14,9 +14,33 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.urls import re_path as url # from django.conf.urls import url # se usaba en la version 3.4
 from django.contrib import admin
-from django.urls import path
+import django.views.static
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-]
+from appturopamiestilo import views, perfil, modulo, persona, usuario, parroquia
+from turopamiestilo import settings
+
+urlpatterns = []
+if settings.DEBUG:
+    urlpatterns = [
+        url(r'^turopamiestilo/static/(?P<path>.*)$', django.views.static.serve,
+            {'document_root': settings.STATIC_ROOT}),
+        url(r'^turopamiestilo/media/(?P<path>.*)$', django.views.static.serve,
+            {'document_root': settings.MEDIA_ROOT}),
+    ]
+
+urlpatterns += {
+    url(r'^admin/', admin.site.urls),
+    url(r'^$', views.panel),
+    url(r'^login', views.login_user),
+    url(r'^logout$', views.logout_user),
+    url(r'^perfil', perfil.view),
+    url(r'^modulo', modulo.view),
+    url(r'^persona', persona.view),
+    url(r'^usuario', usuario.view),
+    url(r'^parroquia', parroquia.view),
+
+
+
+}
