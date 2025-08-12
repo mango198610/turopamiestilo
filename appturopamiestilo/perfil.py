@@ -8,7 +8,9 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils.encoding import force_str as force_text
 
-from appturopamiestilo.models import Perfil
+from appturopamiestilo.funciones import ip_client_address, MiPaginador
+from appturopamiestilo.models import Perfil, AccesoModulo, ModuloPerfil, Modulo, PerfilPersona
+from appturopamiestilo.views import addUserData
 
 
 @login_required(redirect_field_name='ret', login_url='/login')
