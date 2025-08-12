@@ -64,7 +64,6 @@ def view(request):
                         mensaje = 'Actualizado modulo'
                         persona = Persona.objects.get(id=int(request.POST['id']))
                         persona.nombre = request.POST['nombre']
-                        persona.estado = True
 
                     persona.save()
 
@@ -125,10 +124,6 @@ def view(request):
                     data = {'title': ''}
 
                     persona = Persona.objects.get(pk=int(request.POST['id']))
-                    data['persona'] = [
-                        {'id': persona.id,
-                         "nombre": str(persona.nombres),"estado": "1" if persona.estado else "2"
-                         }]
 
                     data['persona'] = [
                         {'id': persona.id,
@@ -150,7 +145,7 @@ def view(request):
                          "parroquiaresidencia":getattr(persona.parroquia, 'id', 0),
                          "calleprincipal":str(persona.direccion),
                          "callesecundaria":str(persona.direccion2),
-                         "numerodomicilio":str(persona.num_direccion),
+                         "numerodomicilio":str(persona.num_direccion)
 
 
 
