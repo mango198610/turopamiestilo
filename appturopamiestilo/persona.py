@@ -2,16 +2,18 @@ import json
 from datetime import datetime
 from django.contrib.admin.models import LogEntry, CHANGE, ADDITION, DELETION
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils.encoding import force_str as force_text
 
-from appturopamiestilo.funciones import ip_client_address, MiPaginador
+from appturopamiestilo.funciones import ip_client_address, MiPaginador, calculate_username
 from appturopamiestilo.models import Persona, Canton, Parroquia, Perfil, AccesoModulo, Nacionalidad, Sexo, Provincia, \
     TipoIdentificacion, TipoSangre, Sector, NivelAcademico, EstadoCivil, Empresa
 from appturopamiestilo.views import addUserData
+from turopamiestilo.settings import DEFAULT_PASSWORD
 
 
 @login_required(redirect_field_name='ret', login_url='/login')
@@ -58,6 +60,13 @@ def view(request):
                                           email1=request.POST.get('txtcorreo2'), email2=request.POST.get('txtcorreo3'),
                                           nacimiento=request.POST.get('dtbfechanacimiento'),
                                           fecha_registro=datetime.now())
+
+                        username = calculate_username(persona)
+                        password = DEFAULT_PASSWORD
+                        user = User.objects.create_user(username=username, password=password,
+                                                        email=persona.email, is_active=True)
+                        user.save()
+                        persona.usuario = user
 
 
                     else:
@@ -304,12 +313,12 @@ def view(request):
 
                         lista.append({
                             'nombre': str(d.nombre_completo_inverso()),
-                            'usuario': str(d.usuario.username),
+                            'usuario': str(d.usuario.username if d.usuario else 'SIN USUARIO') ,
                             'identificacion': str(d.identificacion),
                             'telefono': str(d.telefono if d.telefono else '---'),
                             'fechaingreso': str(d.fecha_registro.strftime('%Y-%m-%d')),
                             'perfiles': [p.perfil.nombre for p in d.perfiles()],
-                            'estado': str("ACTIVO" if d.usuario.is_active else "INACTIVO"),
+                            'estado': str("ACTIVO" if d.usuario.is_active else "INACTIVO") if d.usuario else 'INACTIVO',
                               'acciones': f'''
                                         <div class="dropdown">
                                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-expanded="false">
