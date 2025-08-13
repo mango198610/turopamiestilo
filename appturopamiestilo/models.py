@@ -245,3 +245,16 @@ class AccesoModulo(models.Model):
     def __str__(self):
         return str(self.perfilpersona.perfil.nombre) + ' ' + str(
             self.perfilpersona.persona.nombre_completo_inverso()) + ' ' + str(self.modulo.nombre)
+
+
+class Empresa(models.Model):
+    tipoidentificacion = models.ForeignKey(TipoIdentificacion, blank=True, null=True, on_delete=models.CASCADE)
+    actividad = models.ForeignKey(ActividadComercial, blank=True, null=True, on_delete=models.CASCADE)
+    identificacion = models.CharField(max_length=13, blank=True, null=True)
+    nombre = models.CharField(max_length=1000, null=True)
+    direccion = models.CharField(max_length=2000, null=True)
+    logo=models.FileField(upload_to="empresas_logo/", blank=True, null=True)
+    estado = models.BooleanField(default=True)
+
+    def __str__(self):
+        return str(self.nombre) + ' - ' + str(self.identificacion)

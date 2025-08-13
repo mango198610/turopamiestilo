@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.db.models import Q
 
-from appturopamiestilo.models import Canton
+from appturopamiestilo.models import Canton, ActividadComercial
 
 
 def elimina_tildes(cadena):

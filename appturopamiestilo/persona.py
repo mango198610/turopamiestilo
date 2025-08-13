@@ -10,7 +10,7 @@ from django.utils.encoding import force_str as force_text
 
 from appturopamiestilo.funciones import ip_client_address, MiPaginador
 from appturopamiestilo.models import Persona, Canton, Parroquia, Perfil, AccesoModulo, Nacionalidad, Sexo, Provincia, \
-    TipoIdentificacion, TipoSangre, Sector, NivelAcademico, EstadoCivil
+    TipoIdentificacion, TipoSangre, Sector, NivelAcademico, EstadoCivil, Empresa
 from appturopamiestilo.views import addUserData
 
 
@@ -354,6 +354,7 @@ def view(request):
             data['listasectorresidencia'] = Sector.objects.filter(estado=True)
             data['listanivelacademico'] = NivelAcademico.objects.filter(estado=True)
             data['listaestadocivil'] = EstadoCivil.objects.filter(estado=True)
+            data['listadoempresa'] = Empresa.objects.filter(estado=True)
 
 
 
