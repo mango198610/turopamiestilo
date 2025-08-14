@@ -11,7 +11,7 @@ from django.utils.encoding import force_str as force_text
 
 from appturopamiestilo.funciones import ip_client_address, MiPaginador, calculate_username
 from appturopamiestilo.models import Persona, Canton, Parroquia, Perfil, AccesoModulo, Nacionalidad, Sexo, Provincia, \
-    TipoIdentificacion, TipoSangre, Sector, NivelAcademico, EstadoCivil, Empresa
+    TipoIdentificacion, TipoSangre, Sector, NivelAcademico, EstadoCivil, Empresa, PerfilPersona, ModuloPerfil, Modulo
 from appturopamiestilo.views import addUserData
 from turopamiestilo.settings import DEFAULT_PASSWORD
 
@@ -66,7 +66,28 @@ def view(request):
                         user = User.objects.create_user(username=username, password=password,
                                                         email=persona.email, is_active=True)
                         user.save()
+                        user.set_password(DEFAULT_PASSWORD)
+                        user.save()
                         persona.usuario = user
+
+                        listaperfil = request.POST.getlist('cmbperfil')
+                        for d in listaperfil:
+                            perfil = Perfil.objects.get(id=int(d))
+                            if not PerfilPersona.objects.filter(perfil=perfil, persona_id=persona.id).exists():
+                                perfilpersona = PerfilPersona(perfil=perfil, persona_id=persona.id)
+                                perfilpersona.save()
+                            else:
+                                perfilpersona = PerfilPersona.objects.filter(perfil=perfil,
+                                                                             persona_id=persona.id).last()
+
+                            listamoduloperfil = ModuloPerfil.objects.filter(perfil=perfil)
+                            for a in listamoduloperfil:
+                                modulo = Modulo.objects.get(id=a.modulo.id)
+                                if not AccesoModulo.objects.filter(perfilpersona=perfilpersona,
+                                                                   modulo=modulo).exists():
+                                    accesomodulo = AccesoModulo(perfilpersona=perfilpersona, modulo=modulo,
+                                                                ingresar=True, editar=True, ver=True, eliminar=True)
+                                    accesomodulo.save()
 
 
                     else:
@@ -234,6 +255,49 @@ def view(request):
 
                 except Exception as ex:
                     return HttpResponse(json.dumps({"result": "bad", "message": ex}), content_type="application/json")
+
+
+            elif action == 'validaridentificacion':
+                try:
+                    data = {'title': ''}
+                    if Persona.objects.filter(identificacion=str(request.POST['identificacion']).strip()).exists():
+                        return HttpResponse(json.dumps({'result': 'bad',
+                                                        'message': 'La Cédula o Passporte ya se encuentra registrado '}),
+                                            content_type="application/json")
+
+                    data['result'] = 'ok'
+
+                    return HttpResponse(json.dumps(data), content_type="application/json")
+                except Exception as e:
+                    return HttpResponse(json.dumps({'result': 'bad', 'message': str(e)}),
+                                        content_type="application/json")
+
+
+            elif action == 'agregarusuario':
+                try:
+                    data = {'title': ''}
+                    persona=Persona.objects.get(pk=int(request.POST['id']))
+
+                    username = calculate_username(persona)
+                    password = DEFAULT_PASSWORD
+                    user = User.objects.create_user(username, persona.email, password)
+                    user.save()
+
+                    user.first_name=persona.nombres
+                    user.last_name=persona.apellidos()
+                    user.set_password(DEFAULT_PASSWORD)
+                    user.save()
+
+                    persona.usuario = user
+
+                    persona.save()
+
+                    data['result'] = 'ok'
+
+                    return HttpResponse(json.dumps(data), content_type="application/json")
+                except Exception as e:
+                    return HttpResponse(json.dumps({'result': 'bad', 'message': str(e)}),
+                                        content_type="application/json")
 
 
             elif action == 'serverSide':

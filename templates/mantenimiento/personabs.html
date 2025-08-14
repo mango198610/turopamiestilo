@@ -50,26 +50,6 @@
 
                      }
 
-                 $("#txtidentificacion").blur(function () {
-
-                    if (validarCedula($("#txtidentificacion").val(), $("#cmbidetificacion").val()) != 0) {
-                         swal("Error", "Número de Cédula Incorrecta", "error");
-                         $("#txtidentificacion").val("");
-                     } else {
-                         $.post("/persona", {
-                             "action": "validaridentificacion",
-                             identificacion: $("#txtidentificacion").val(),
-                             idcarrera: $("#cmbcarrera").val()
-                         }, function (data) {
-                             if (data.result == 'bad') {
-                                 swal("Error", data.message, "error");
-                                 $("#txtidentificacion").val("");
-                             }
-                         }, 'json');
-                     }
-
-                });
-                 
 
                   var tablapersona=new DataTable('#tablapersona', {
                    language: {
@@ -234,42 +214,66 @@
                         return true
                   }
                   
-                  function validarCamposDeTab(tabSelector) {                       
+                  function validarCamposDeTab(tabSelector) {
                         const tab = document.querySelector(tabSelector);
                         const fields = tab.querySelectorAll('input[required], select[required], textarea[required]');
                         let valido = true;
-                    
+
                         for (let field of fields) {
                             const isVisible = field.offsetParent !== null;
-                    
+
                             if (isVisible && (!field.value || field.value === "0")) {
                                 field.classList.add("is-invalid");
-                    
+
                                 let feedback = field.parentElement.querySelector('.invalid-feedback');
                                 if (!feedback) {
                                     feedback = document.createElement('div');
                                     feedback.className = 'invalid-feedback';
                                     field.parentElement.appendChild(feedback);
                                 }
-                    
+
                                 feedback.textContent = "Este campo es obligatorio.";
                                 feedback.style.display = 'block';
-                    
+
                                 setTimeout(() => field.focus(), 300);  // evitar error de no focusable
                                 valido = false;
                                 break;
                             } else {
                                 field.classList.remove("is-invalid");
-                                const feedback = field.parentElement.querySelector('.invalid-feedback');
-                                if (feedback) {
-                                    feedback.textContent = "";
-                                    feedback.style.display = 'none';
+                                let feedback = field.parentElement.querySelector('.invalid-feedback');
+                                if (!feedback) {
+                                     feedback = document.createElement('div');
+                                     feedback.className = 'invalid-feedback';
+                                     field.parentElement.appendChild(feedback);
                                 }
+                                feedback.textContent = "";
+                                feedback.style.display = 'none';
+                                const nombreCampo = field.id;
+                                if (nombreCampo === 'txtidentificacion') {
+                                    if ($("#cmbtipoidentificacion").val()==1){
+
+                                        if(!validarCedula($("#txtidentificacion").val())) {
+                                            feedback.textContent = "La cédula del representante no es válida.";
+                                            feedback.style.display = 'block';
+                                            valido = false;
+                                            break;
+                                        }
+
+                                    }else {
+                                         if(!validarRuc($("#txtidentificacion").val())) {
+                                            feedback.textContent = "El RUC ingresado no es válido.";
+                                            feedback.style.display = 'block';
+                                            valido = false;
+                                            break;
+                                         }
+                                    }
+                                }
+
                             }
                         }
-                    
+
                         return valido;
-                  }
+                }
 
                   function validarTabsEnOrden(...tabs) {
                         for (let tabId of tabs) {
