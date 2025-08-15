@@ -258,3 +258,20 @@ class Empresa(models.Model):
 
     def __str__(self):
         return str(self.nombre) + ' - ' + str(self.identificacion)
+
+
+class Categoria(models.Model):
+    nombre = models.CharField(max_length=1000, null=True)
+    descripcion = models.CharField(max_length=5000, null=True)
+    estado = models.BooleanField(default=True)
+
+
+class Producto(models.Model):
+    nombre = models.CharField(max_length=1000, null=True)
+    categoria = models.ForeignKey(Categoria, blank=True, null=True, on_delete=models.CASCADE)
+    descripcion = models.CharField(max_length=5000, null=True)
+    precio=models.DecimalField(decimal_places=2, max_digits=10,default=0)
+    estado = models.BooleanField(default=True)
+
+    def __str__(self):
+        return str(self.nombre)

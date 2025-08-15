@@ -177,9 +177,6 @@ def view(request):
                          "callesecundaria":str(persona.direccion2),
                          "numerodomicilio":str(persona.num_direccion)
 
-
-
-
                          }]
 
                     data['result'] = 'ok'
@@ -284,7 +281,7 @@ def view(request):
                     user.save()
 
                     user.first_name=persona.nombres
-                    user.last_name=persona.apellidos()
+                    user.last_name= str(persona.apellido1) + ' ' + str(persona.apellido2)
                     user.set_password(DEFAULT_PASSWORD)
                     user.save()
 
@@ -298,6 +295,37 @@ def view(request):
                 except Exception as e:
                     return HttpResponse(json.dumps({'result': 'bad', 'message': str(e)}),
                                         content_type="application/json")
+
+            if action == 'asignarperfil':
+                try:
+                    data = {'title': ''}
+                    persona = Persona.objects.get(id=int(request.POST['id']))
+                    listaperfil = request.POST.getlist('cmbperfilasignar')
+                    for d in listaperfil:
+                        perfil = Perfil.objects.get(id=int(d))
+                        if not PerfilPersona.objects.filter(perfil=perfil, persona_id=persona.id).exists():
+                            perfilpersona = PerfilPersona(perfil=perfil, persona_id=persona.id)
+                            perfilpersona.save()
+                        else:
+                            perfilpersona = PerfilPersona.objects.filter(perfil=perfil,
+                                                                         persona_id=persona.id).last()
+
+                        listamoduloperfil = ModuloPerfil.objects.filter(perfil=perfil)
+                        for a in listamoduloperfil:
+                            modulo = Modulo.objects.get(id=a.modulo.id)
+                            if not AccesoModulo.objects.filter(perfilpersona=perfilpersona,
+                                                               modulo=modulo).exists():
+                                accesomodulo = AccesoModulo(perfilpersona=perfilpersona, modulo=modulo,
+                                                            ingresar=True, editar=True, ver=True, eliminar=True)
+                                accesomodulo.save()
+
+                    data['result'] = 'ok'
+                    return HttpResponse(json.dumps(data), content_type="application/json")
+                except Exception as e:
+                    return HttpResponse(json.dumps({'result': 'bad', 'message': str(e)}),
+                                        content_type="application/json")
+
+
 
 
             elif action == 'serverSide':
@@ -335,20 +363,31 @@ def view(request):
                                 ss.remove('')
                             if len(ss) == 1:
                                 listapersona = listapersona.filter(
-                                    nombres__icontains=search).order_by('nombres')
+                                    Q(nombres__icontains=search) | Q(apellido1__icontains=search)| Q(apellido2__icontains=search)).order_by('nombres')
                                 filtrado = True
                             else:
                                 listapersona = listapersona.filter(
-                                    Q(nombres__icontains=ss[0]) & Q(
-                                        nombres__icontains=ss[1])).order_by('nombres')
+                                    Q(nombres__icontains=ss[0]) | Q(
+                                        nombres__icontains=ss[1]) | Q(apellido1__icontains=ss[0]) | Q(apellido1__icontains=ss[1])
+                                    | Q(apellido2__icontains=ss[0]) | Q(apellido2__icontains=ss[1])
+                                    ).order_by('nombres')
                                 filtrado = True
 
                     if request.POST['columns[1][search][value]'] != '':
-                        url = request.POST['columns[1][search][value]']
-                        listapersona = listapersona.filter(url__icontains=url)
+                        username = request.POST['columns[1][search][value]']
+                        listapersona = listapersona.filter(usuario__username__icontains=username)
 
                         filtrado = True
 
+                    if request.POST['columns[2][search][value]'] != '':
+                        identificacion = request.POST['columns[2][search][value]']
+                        listapersona = listapersona.filter(identificacion=identificacion)
+
+                        filtrado = True
+
+                    if request.POST['columns[3][search][value]'] != '':
+                        telefono = request.POST['columns[3][search][value]']
+                        listapersona = listapersona.filter(telefono__icontains=telefono)
 
                     listapersona = listapersona.order_by('nombres')
                     registros = listapersona[start:start + length] if length != -1 else listapersona
