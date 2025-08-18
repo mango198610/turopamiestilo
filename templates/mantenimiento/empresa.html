@@ -377,10 +377,7 @@
                                  }
                                  $("#cmbactividad").html(activitxt);
 
-                                 {#for (var xcrago in data.empresa[0].listacargo) {#}
-                                 {#    cargotxt = cargotxt + '<option  value="' + data.empresa[0].listacargo[xcrago].id + '"> ' + data.empresa[0].listacargo[xcrago].nombre + '</option>';#}
-                                 {#}#}
-                                 {#$("#cmbcargo").html(cargotxt);#}
+
 
                                  if (data.empresa[0].logo!='') {
                                      previewImg.src = data.empresa[0].logo;
