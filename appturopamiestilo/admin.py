@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from appturopamiestilo.models import ModuloPerfil, Perfil, Modulo, AccesoModulo, PerfilPersona, Pais, Provincia, Canton, \
     Parroquia, Persona, Sexo, TipoIdentificacion, Nacionalidad, SectorComercial, ActividadComercial, TipoSangre, Sector, \
-    NivelAcademico, EstadoCivil
+    NivelAcademico, EstadoCivil, TipoSize,  Categoria
 
 # Register your models here.
 
@@ -25,3 +25,5 @@ admin.site.register(TipoSangre)
 admin.site.register(Sector)
 admin.site.register(NivelAcademico)
 admin.site.register(EstadoCivil)
+admin.site.register(TipoSize)
+admin.site.register(Categoria)
