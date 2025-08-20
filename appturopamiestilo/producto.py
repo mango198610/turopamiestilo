@@ -95,9 +95,15 @@ def view(request):
                         htmlAcciones += ' <li><a class="dropdown-item" style="cursor: pointer" onclick="editar(' + str(
                             d.id) + ');"><i class="dw dw-edit-2"></i>  Editar</a></li>'
 
+                        htmlAcciones += ' <li><a class="dropdown-item" style="cursor: pointer" onclick="agregarStock(' + str(
+                            d.id) + ',\'' + str(
+                            d.nombre).upper() + '\');"><i class="dw dw-delete-3"></i> Stock</a></li>'
+
                         htmlAcciones += ' <li><a class="dropdown-item" style="cursor: pointer" onclick="eliminarProducto(' + str(
                             d.id) + ',\'' + str(
                             d.nombre).upper() + '\');"><i class="dw dw-delete-3"></i>  Eliminar</a></li>'
+
+
                         if d.estado:
                             htmlestado = '<span class="badge bg-success fs-6">ACTIVO</span>'
                         else:
