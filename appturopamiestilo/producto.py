@@ -62,6 +62,8 @@ def view(request):
                     start = int(request.POST.get('start', 0))
                     length = int(request.POST.get('length', 10))
 
+                    accesomodulo = AccesoModulo.objects.get(id=int(request.POST['permisopcion[acc]']))
+
                     listaproducto = Producto.objects.filter()
                     registros_total = listaproducto.count()
 
@@ -95,9 +97,9 @@ def view(request):
                         htmlAcciones += ' <li><a class="dropdown-item" style="cursor: pointer" onclick="editar(' + str(
                             d.id) + ');"><i class="dw dw-edit-2"></i>  Editar</a></li>'
 
-                        htmlAcciones += ' <li><a class="dropdown-item" style="cursor: pointer" onclick="agregarStock(' + str(
-                            d.id) + ',\'' + str(
-                            d.nombre).upper() + '\');"><i class="dw dw-delete-3"></i> Stock</a></li>'
+                        htmlAcciones += ' <li><a class="dropdown-item" style="cursor: pointer" href="/stock?id=' + str(d.id) + '&acc=' + str(
+                            accesomodulo.id) +'";"><i class="dw dw-book-1"></i> Stock</a></li>'
+
 
                         htmlAcciones += ' <li><a class="dropdown-item" style="cursor: pointer" onclick="eliminarProducto(' + str(
                             d.id) + ',\'' + str(
@@ -172,11 +174,12 @@ def view(request):
         else:
             data = {'title':'Productos'}
             addUserData(request, data)
-            data['permisopcion'] = AccesoModulo.objects.get(id=int(request.GET['acc']))
-            data['listacategoria'] = Categoria.objects.filter(estado=True)
-
-
-            return render(request, "mantenimiento/producto.html", data)
+            if 'action' in request.GET:
+                action = request.GET['action']
+            else:
+                data['permisopcion'] = AccesoModulo.objects.get(id=int(request.GET['acc']))
+                data['listacategoria'] = Categoria.objects.filter(estado=True)
+                return render(request, "mantenimiento/producto.html", data)
 
     except Exception as e:
         print('Error excepcion cursos '+str(e))

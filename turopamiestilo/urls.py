@@ -18,7 +18,7 @@ from django.urls import re_path as url # from django.conf.urls import url # se u
 from django.contrib import admin
 import django.views.static
 
-from appturopamiestilo import views, perfil, modulo, persona, usuario, parroquia, empresa, producto
+from appturopamiestilo import views, perfil, modulo, persona, usuario, parroquia, empresa, producto, stock, viewpagina
 from turopamiestilo import settings
 
 urlpatterns = []
@@ -32,7 +32,8 @@ if settings.DEBUG:
 
 urlpatterns += {
     url(r'^admin/', admin.site.urls),
-    url(r'^$', views.panel),
+    url(r'^panel$', views.panel),
+    url(r'^$', viewpagina.paginainicio),
     url(r'^login', views.login_user),
     url(r'^logout$', views.logout_user),
     url(r'^perfil', perfil.view),
@@ -42,6 +43,7 @@ urlpatterns += {
     url(r'^parroquia', parroquia.view),
     url(r'^empresa', empresa.view),
     url(r'^producto', producto.view),
+    url(r'^stock', stock.view),
 
 
 
