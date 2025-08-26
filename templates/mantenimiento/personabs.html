@@ -106,7 +106,93 @@
                 });
 
 
-                  
+                  $("#btnagregar").click(function() {
+                       $("#tituloventana").html("Ingresar Persona");
+
+                       $("#cmbgrupo").select2({
+                           theme: "classic",
+                           dropdownParent: $('#ventanapersona'),
+                           ajax: {
+                                type: "POST",
+                                url: "/persona",
+                                dataType: 'json',
+                                delay: 250,
+                                data: function (params) {
+                                    return {
+                                        q: params.term, // search term
+                                        page: params.page,
+                                        action: "grupos",
+
+                                    };
+                                },
+                                processResults: function (data, params) {
+                                    // parse the results into the format expected by Select2
+                                    // since we are using custom formatting functions we do not need to
+                                    // alter the remote JSON data, except to indicate that infinite
+                                    // scrolling can be used
+                                    params.page = params.page || 1;
+
+                                    return {
+                                        results: data.items,
+                                        pagination: {
+                                            more: (params.page * 30) < data.total_count
+                                        }
+                                    };
+                                },
+                                cache: true
+                            },
+
+                            minimumInputLength: 2,
+                            templateResult: formatRepo,
+                            templateSelection: formatRepoSelection,
+                            placeholder: "Buscar Grupos",
+                            language: {
+                                inputTooShort: function () {
+                                    return 'Ingrese un nombre';
+                                },
+                                searching: function () {
+                                    return "Buscando Grupos...";
+                                },
+                                noResults: function () {
+                                    return "No se encontró información";
+                                }
+                            }
+                        });
+
+                       $("#cmbperfil").select2({ theme: "classic",
+                           dropdownParent: $('#ventanapersona')
+                       });
+
+
+                        function formatRepo(repo) {
+                                if (repo.loading) {
+                                    return repo.text;
+                                }
+
+                                var $container = $(
+                                    "<div class='select2-result-repository clearfix'>" +
+                                    "<div class='select2-result-repository__meta'>" +
+                                    "<div class='select2-result-repository__description'></div>" +
+                                    "</div>" +
+                                    "</div>"
+                                );
+
+                            $container.find(".select2-result-repository__description").text(repo.nombre);
+
+                            return $container;
+                        }
+
+                        function formatRepoSelection(repo) {
+
+                            return repo.nombre || repo.text;
+                        }
+
+
+
+                       $("#ventanapersona").modal({backdrop: 'static', keyboard: false});
+                       $("#ventanapersona").modal("show");
+                  });
+
                   function elimimarfeedback(tabSelector) {                       
                         const tab = document.querySelector(tabSelector);
                         const fields = tab.querySelectorAll('input[required], select[required], textarea[required]');
