@@ -65,7 +65,7 @@
 
                        table.columns.adjust();
                     }
-                });
+                 });
 
                 $("#cmbcanton").select2({
                        width: "100%",
@@ -117,7 +117,7 @@
                         }
                     });
 
-                    function formatRepo(repo) {
+                function formatRepo(repo) {
                             if (repo.loading) {
                                 return repo.text;
                             }
@@ -135,14 +135,14 @@
                         return $container;
                     }
 
-                    function formatRepoSelection(repo) {
+                function formatRepoSelection(repo) {
 
                         return repo.nombre || repo.text;
                     }
 
 
 
-                  $("#btnagregar").click(function() {
+                $("#btnagregar").click(function() {
                        $("#tituloventana").html("Ingresar Parroquia");
 
                        $("#ventanaparroquia").modal({backdrop: 'static', keyboard: false});
@@ -150,7 +150,7 @@
                   });
 
 
-                  $('#frmingresoparroquia').on('submit', function(e) {
+                $('#frmingresoparroquia').on('submit', function(e) {
                       e.preventDefault();
                       Loader.open();
                       var mensapresentacion= idparroquia==0 ? 'Se ingreso correctamente' : 'Se actualizo correctamente'
@@ -186,13 +186,13 @@
 
                   });
 
-                  $("#btncancelar").click(function() {
+                $("#btncancelar").click(function() {
                      document.getElementById("frmingresoparroquia").reset();
                      $("#ventanaparroquia").modal('hide');
                   });
 
 
-                  editar=function (idparro){
+                editar=function (idparro){
 
                          $("#tituloventana").html("Actualizar Parroquia");
 
@@ -226,7 +226,7 @@
                          });
                   }
 
-                  eliminarParroquia = function (id,nombre) {
+                eliminarParroquia = function (id,nombre) {
 
                       swal({
                         title: '¿Está seguro que desea eliminar la parroquia?',
