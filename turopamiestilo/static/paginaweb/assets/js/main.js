@@ -19,8 +19,8 @@
         loop: true,
         dots: false,
         arrows: true,
-        prevArrow: '<span class="slider-icon-prev"><img class="injectable" src="assets/images/icon-img/arrow-left.svg" alt=""></span>',
-        nextArrow: '<span class="slider-icon-next"><img class="injectable" src="assets/images/icon-img/arrow-right.svg" alt=""></span>',
+        prevArrow: '<span class="slider-icon-prev"><img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/arrow-left.svg" alt=""></span>',
+        nextArrow: '<span class="slider-icon-next"><img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/arrow-right.svg" alt=""></span>',
         responsive: [{
                 breakpoint: 1500,
                 settings: {
