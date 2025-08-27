@@ -474,8 +474,8 @@
         dots: false,
         focusOnSelect: true,
         fade: false,
-        prevArrow: '<span class="pro-dec-prev"><img class="injectable" src="assets/images/icon-img/arrow-left-5.svg" alt=""></span>',
-        nextArrow: '<span class="pro-dec-next"><img class="injectable" src="assets/images/icon-img/arrow-right-5.svg" alt=""></span>',
+        prevArrow: '<span class="pro-dec-prev"><img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/arrow-left-5.svg" alt=""></span>',
+        nextArrow: '<span class="pro-dec-next"><img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/arrow-right-5.svg" alt=""></span>',
         responsive: [{
                 breakpoint: 767,
                 settings: {

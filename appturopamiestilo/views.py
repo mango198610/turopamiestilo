@@ -58,9 +58,24 @@ def login_user(request):
 
 def addUserData(request, data):
     data['usuario'] = request.user
-    perfilpersona = PerfilPersona.objects.filter(persona__usuario=request.user).first()
-    data['perfilpersona'] = perfilpersona
-    data['listadoPerfil'] = PerfilPersona.objects.filter(persona=perfilpersona.persona)
+    rutalista = []
+    urlmod = request.path
+    if request.user.is_authenticated:
+        perfilpersona = PerfilPersona.objects.filter(persona__usuario=request.user).first()
+        data['perfilpersona'] = perfilpersona
+        data['listadoPerfil'] = PerfilPersona.objects.filter(persona=perfilpersona.persona)
+        if 'acc' in request.GET:
+            urlmod = urlmod + '?acc=' + request.GET['acc']
+
+    if 'id' in request.GET:
+        urlmod = urlmod + '?id=' + request.GET['id']
+
+    url = [urlmod, data['title']]
+    rutalista.append(url)
+    rutalista.insert(0,['/','Inicio'])
+    data['ruta'] = rutalista
+
+
 
 
 def logout_user(request):

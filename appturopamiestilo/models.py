@@ -289,6 +289,20 @@ class Producto(models.Model):
         stock=StockProducto.objects.filter(producto=self).first()
         return stock
 
+    def sizeproducto(self):
+        size=TipoSize.objects.filter(id__in=StockProducto.objects.filter(producto=self).values_list('tipo_id',flat=True))
+        return size
+
+    def colorproducto(self):
+        color=StockProducto.objects.filter(producto=self).distinct('color')
+        return color
+
+    def imagenproducto(self):
+        imagen=ImagenProducto.objects.filter(producto=self)
+        return imagen
+
+
+
 class StockProducto(models.Model):
     producto = models.ForeignKey(Producto, blank=True, null=True, on_delete=models.CASCADE)
     tipo = models.ForeignKey(TipoSize, blank=True, null=True, on_delete=models.CASCADE)
@@ -300,6 +314,8 @@ class StockProducto(models.Model):
 
 
 class ImagenProducto(models.Model):
+    nombre = models.CharField(max_length=1000, null=True)
+    orden = models.PositiveIntegerField(default=0)
     producto = models.ForeignKey(Producto, blank=True, null=True, on_delete=models.CASCADE)
     imagen=models.FileField(upload_to="imagen_producto/", blank=True, null=True)
     estado = models.BooleanField(default=True)

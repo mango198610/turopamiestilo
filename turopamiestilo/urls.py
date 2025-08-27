@@ -18,7 +18,8 @@ from django.urls import re_path as url # from django.conf.urls import url # se u
 from django.contrib import admin
 import django.views.static
 
-from appturopamiestilo import views, perfil, modulo, persona, usuario, parroquia, empresa, producto, stock, viewpagina
+from appturopamiestilo import views, perfil, modulo, persona, usuario, parroquia, empresa, producto, stock, viewpagina, \
+    detalleproducto, imagen
 from turopamiestilo import settings
 
 urlpatterns = []
@@ -44,6 +45,8 @@ urlpatterns += {
     url(r'^empresa', empresa.view),
     url(r'^producto', producto.view),
     url(r'^stock', stock.view),
+    url(r'^detalleproducto', detalleproducto.view),
+    url(r'^imagen$', imagen.view),
 
 
 

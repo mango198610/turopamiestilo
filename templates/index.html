@@ -3,8 +3,125 @@
 {% block heading %}
 
 {% endblock %}
-
+{% block slider %}
+    <div class="slider-area">
+       <div class="slider-active-1 nav-style-1">
+                <div
+                    class="single-slider-wrap slider-height-1 custom-d-flex custom-align-item-center single-animation-wrap">
+                    <div class="slider-img">
+                        <img src="/turopamiestilo/static/paginaweb/assets/images/slider/slider-1.png" alt="">
+                    </div>
+                    <div class="slider-content slider-animated-1">
+                        <h3 class="animated">BEST SALE THIS WEEK</h3>
+                        <h1 class="animated">Spring <br> summer</h1>
+                        <div class="btn-style">
+                            <a class="btn btn-outline-primary slider-btn animated" href="product-details.html">Shop
+                                now</a>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="single-slider-wrap slider-height-1 custom-d-flex custom-align-item-center single-animation-wrap">
+                    <div class="slider-img">
+                        <img src="/turopamiestilo/static/paginaweb/assets/images/slider/slider-2.png" alt="">
+                    </div>
+                    <div class="slider-content slider-animated-1">
+                        <h3 class="animated">BEST SALE THIS WEEK</h3>
+                        <h1 class="animated">Winter <br> summer</h1>
+                        <div class="btn-style">
+                            <a class="btn btn-outline-primary slider-btn animated" href="product-details.html">Shop
+                                now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+{% endblock %}
+{% block arrive %}
+    <div class="features-area section-padding-2">
+        <div class="container">
+            <div class="features-all-wrap">
+                <div class="row mb-n6">
+{#                        <div class="col-lg-4 col-md-4 mb-6">#}
+{#                            <div class="features-wrap text-center" data-aos="fade-up" data-aos-delay="200">#}
+{#                                <div class="features-img">#}
+{#                                    <img class="injectable" src="assets/images/icon-img/cut.svg" alt="">#}
+{#                                </div>#}
+{#                                <h3>New Discount</h3>#}
+{#                                <p>Suspendisse sit amet accumsan massa, et ullamcorper purus</p>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="col-lg-4 col-md-4 mb-6">#}
+{#                            <div class="features-wrap text-center" data-aos="fade-up" data-aos-delay="300">#}
+{#                                <div class="features-img">#}
+{#                                    <img class="injectable" src="assets/images/icon-img/gift.svg" alt="">#}
+{#                                </div>#}
+{#                                <h3>Gift Vouchers</h3>#}
+{#                                <p>Suspendisse sit amet accumsan massa, et ullamcorper purus</p>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        <div class="col-lg-4 col-md-4 mb-6">#}
+{#                            <div class="features-wrap text-center" data-aos="fade-up" data-aos-delay="400">#}
+{#                                <div class="features-img">#}
+{#                                    <img class="injectable" src="assets/images/icon-img/car.svg" alt="">#}
+{#                                </div>#}
+{#                                <h3>Free Delivery</h3>#}
+{#                                <p>Suspendisse sit amet accumsan massa, et ullamcorper purus</p>#}
+{#                            </div>#}
+{#                        </div>#}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="product-area section-padding-lr-1 section-padding-3">
+        <div class="container-fluid">
+            <div class="section-title mb-12 text-center">
+                <h2 data-aos="fade-up" data-aos-delay="200">Colección Reciente</h2>
+            </div>
+            <div class="tab-style-1 nav mb-10" data-aos="fade-up" data-aos-delay="300">
+                <a class="active" href="#pro-1" data-bs-toggle="tab">ALL </a>
+{#                    <a href="#pro-2" data-bs-toggle="tab" class=""> MEN </a>#}
+{#                    <a href="#pro-3" data-bs-toggle="tab" class=""> WOMEN </a>#}
+{#                    <a href="#pro-4" data-bs-toggle="tab"> KIDS </a>#}
+{#                    <a href="#pro-5" data-bs-toggle="tab"> SALE OFF </a>#}
+            </div>
+            <div class="tab-content jump padding-54-row-col">
+                <div id="pro-1" class="tab-pane active">
+                    <div class="row mb-n10">
+                        {% for xproducto in producto %}
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-10">
+                                <div class="product-wrap" data-aos="fade-up" data-aos-delay="200">
+                                    <div class="product-img img-zoom mb-4">
+                                        <a  href="/detalleproducto?id={{ xproducto.id }}">
+                                            <img class="default-img" src="../turopamiestilo/static/paginaweb/assets/images/product/product-1.png" alt="">
+                                        </a>
+                                        <div class="product-action-wrap">
+                                            <button title="Quick View" data-bs-toggle="modal"
+                                                data-bs-target="#exampleModal"><img class="injectable"
+                                                    src="../turopamiestilo/static/paginaweb/assets/images/icon-img/eye.svg" alt=""></button>
+                                            <button title="Add To Cart"><img class="injectable"
+                                                    src="../turopamiestilo/static/paginaweb/assets/images/icon-img/bag-2.svg" alt=""></button>
+                                            <button title="Wishlist"><img class="injectable"
+                                                    src="../turopamiestilo/static/paginaweb/assets/images/icon-img/heart.svg" alt=""></button>
+                                        </div>
+                                    </div>
+                                    <div class="product-content text-center">
+                                        <h3><a href="/detalleproducto?id={{ xproducto.id }}">{{ xproducto.nombre }}</a></h3>
+                                        {% if xproducto.precio %}
+                                            <div class="product-price">
+                                                <span>${{ xproducto.precio.precio }} </span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
 {% block canvas %}
-
 
 {% endblock %}

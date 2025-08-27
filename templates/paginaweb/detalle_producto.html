@@ -1,0 +1,184 @@
+{% extends "basepaginaweb.html" %}
+
+{% block heading %}
+
+    <style>
+        .product-details-content .product-details-color ul li a {
+            width: 17px;
+            height: 17px;
+            font-size: 0;
+            display: inline-block;
+            border-radius: 50%;
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .product-dec-small img {
+            width: 180px;         /* ancho fijo */
+            height: 180px;        /* alto fijo */
+            object-fit: cover;   /* recorta la imagen sin deformarla */
+            border-radius: 6px;  /* opcional, esquinas redondeadas */
+        }
+
+    </style>
+
+{% endblock %}
+
+{% block canvas %}
+    <div class="breadcrumb-area breadcrumb-padding-7">
+        <div class="container">
+            <div class="breadcrumb-content text-center">
+                <div class="breadcrumb-title breadcrumb-title-responsive">
+                    <h2 data-aos="fade-up" data-aos-delay="200">{{ dataproducto.nombre}}</h2>
+                </div>
+                <ul data-aos="fade-up" data-aos-delay="300">
+                    {% for foo in ruta %}
+                        <li>
+                            <a href="{{ foo.0 }}">{{ foo.1 }}</a>
+                        </li>
+                        {% if not forloop.last %}
+                            <li>></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="product-details-area section-padding-lr-2 pb-115">
+            <div class="container-fluid">
+                <div class="back-to-shop" data-aos="fade-up" data-aos-delay="200">
+                    <a href="shop.html"><img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/arrow-left-6.svg" alt=""> Back to Shop</a>
+                </div>
+                <div class="row">
+                    <div class="col-lg-7">
+                        <div class="product-details-tab" data-aos="fade-up" data-aos-delay="300">
+                            <div class="pro-dec-big-img-slider">
+                                {% for ximagen in dataproducto.imagenproducto %}
+                                    <div class="easyzoom-style">
+                                        <div class="easyzoom easyzoom--overlay">
+                                            <a href="#">
+                                                <img src="../turopamiestilo/media/{{ ximagen.imagen.url }}" alt="">
+                                            </a>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="product-dec-slider-small product-dec-small-style1 ">
+                                 {% for ximagen in dataproducto.imagenproducto %}
+                                     {% if forloop.first %}
+                                            <div class="product-dec-small active">
+                                                <img src="../turopamiestilo/media/{{ ximagen.imagen.url }}" alt="">
+                                            </div>
+                                     {% else %}
+                                            <div class="product-dec-small">
+                                                  <img src="../turopamiestilo/media/{{ ximagen.imagen.url }}" alt="">
+                                            </div>
+                                     {% endif %}
+                                 {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="product-details-content product-details-mrg-left">
+                            <div class="product-rating-stock-review" data-aos="fade-up" data-aos-delay="200">
+                                <div class="product-rating">
+                                    <a class="yellow" href="#"><img class="injectable" src="assets/images/icon-img/star-gray-full.svg" alt=""></a>
+                                    <a class="yellow" href="#"><img class="injectable" src="assets/images/icon-img/star-gray-full.svg" alt=""></a>
+                                    <a class="yellow" href="#"><img class="injectable" src="assets/images/icon-img/star-gray-full.svg" alt=""></a>
+                                    <a class="yellow-half" href="#"><img class="injectable" src="assets/images/icon-img/star-gray-half.svg" alt=""></a>
+                                    <a class="gray" href="#"><img class="injectable" src="assets/images/icon-img/star-gray-full.svg" alt=""></a>
+                                </div>
+                                <div class="product-review">
+                                    <span>5  Reviews</span>
+                                </div>
+                                <div class="product-stock">
+                                    <a href="#"><img src="assets/images/icon-img/check-circle.svg" alt=""></a>
+                                    <span>In Stock</span>
+                                </div>
+                            </div>
+                            <h2 data-aos="fade-up" data-aos-delay="300">{{ dataproducto.nombre}}</h2>
+                            <div class="product-details-price" data-aos="fade-up" data-aos-delay="400">
+                                <span>${{ dataproducto.precio.precio }} </span>
+                            </div>
+                            <p data-aos="fade-up" data-aos-delay="500">{{ dataproducto.descripcion }}</p>
+                            <div class="product-details-size clearfix">
+                                <select class="nice-select nice-select-style-1">
+                                    <option value="0">Seleccionar el Tamaño</option>
+                                    {% for xlistasize in dataproducto.sizeproducto %}
+                                        <option value="{{ xlistasize.id }}">{{ xlistasize.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="product-details-color clearfix" data-aos="fade-up" data-aos-delay="600">
+                                <span>Seleccionar el Color</span>
+                                <ul>
+                                    {% for xcolor in dataproducto.colorproducto %}
+                                        <li>
+                                            <a style="background-color: {{ xcolor.color }};" href="#"></a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <div class="product-details-quality-cart" data-aos="fade-up" data-aos-delay="200">
+                                <div class="product-quality">
+                                    <input class="cart-plus-minus-box input-text qty text" name="qtybutton" value="1">
+                                </div>
+                                <div class="product-details-cart">
+                                    <a href="#">Add to cart</a>
+                                </div>
+                            </div>
+                            <div class="product-details-wishlist-compare" data-aos="fade-up" data-aos-delay="300">
+                                <div class="product-details-wishlist">
+                                    <a href="#">
+                                        <img class="injectable" src="assets/images/icon-img/heart-2.svg" alt="">
+                                        Add to wishlist
+                                    </a>
+                                </div>
+                                <div class="product-details-compare">
+                                    <a href="#">
+                                        <img class="injectable" src="assets/images/icon-img/compare.svg" alt="">
+                                        ADD TO COMPARE
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="product-details-meta-wrap" data-aos="fade-up" data-aos-delay="400">
+                                <div class="product-details-meta">
+                                    <span>SKU: </span>
+                                    <ul>
+                                        <li>N/A</li>
+                                    </ul>
+                                </div>
+                                <div class="product-details-meta">
+                                    <span>Categories: </span>
+                                    <ul>
+                                        <li><a href="#">Fashion,</a></li>
+                                        <li><a href="#">Under wear</a></li>
+                                    </ul>
+                                </div>
+                                <div class="product-details-meta">
+                                    <span>Tag: </span>
+                                    <ul>
+                                        <li><a href="#">Underwear,</a></li>
+                                        <li><a href="#">Bikini, </a></li>
+                                        <li><a href="#">Sexy, </a></li>
+                                        <li><a href="#">Hot Trend</a></li>
+                                    </ul>
+                                </div>
+                                <div class="product-details-meta">
+                                    <span>Product ID: </span>
+                                    <ul>
+                                        <li>274</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="product-details-social" data-aos="fade-up" data-aos-delay="500">
+                                <a class="facebook" href="#"><img class="injectable" src="assets/images/icon-img/facebook.svg" alt=""></a>
+                                <a class="twitter" href="#"><img class="injectable" src="assets/images/icon-img/twitter.svg" alt=""></a>
+                                <a class="pinterest" href="#"><img class="injectable" src="assets/images/icon-img/pinterest.svg" alt=""></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}    
