@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 
 from appturopamiestilo.models import Canton, ActividadComercial
+from turopamiestilo.settings import LETRAS_ABECEDARIO_MIN
 
 
 def elimina_tildes(cadena):

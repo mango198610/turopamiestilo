@@ -138,3 +138,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LETRAS_ABECEDARIO_MIN = 'abcdfghijklmnopqrstuvwxyz'
 
 DEFAULT_PASSWORD = '123TUTIENDA'
+
+ID_TIPO_IDENTIFICACION_RUC=3
