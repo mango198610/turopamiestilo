@@ -66,7 +66,7 @@ def view(request):
 
                     accesomodulo = AccesoModulo.objects.get(id=int(request.POST['permisopcion[acc]']))
 
-                    listastock = StockProducto.objects.filter()
+                    listastock = StockProducto.objects.filter(producto_id=int(request.POST['idproducto']))
                     registros_total = listastock.count()
 
                     if request.POST['columns[0][search][value]'] != '':

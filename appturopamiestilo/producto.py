@@ -100,6 +100,9 @@ def view(request):
                         htmlAcciones += ' <li><a class="dropdown-item" style="cursor: pointer" href="/stock?id=' + str(d.id) + '&acc=' + str(
                             accesomodulo.id) +'";"><i class="dw dw-book-1"></i> Stock</a></li>'
 
+                        htmlAcciones += ' <li><a class="dropdown-item" style="cursor: pointer" href="/imagen?id=' + str(
+                            d.id) + '&acc=' + str(
+                            accesomodulo.id) + '";"><i class="dw dw-image1"></i> Imagen</a></li>'
 
                         htmlAcciones += ' <li><a class="dropdown-item" style="cursor: pointer" onclick="eliminarProducto(' + str(
                             d.id) + ',\'' + str(

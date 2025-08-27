@@ -285,6 +285,10 @@ class Producto(models.Model):
     def __str__(self):
         return str(self.nombre)
 
+    def precio(self):
+        stock=StockProducto.objects.filter(producto=self).first()
+        return stock
+
 class StockProducto(models.Model):
     producto = models.ForeignKey(Producto, blank=True, null=True, on_delete=models.CASCADE)
     tipo = models.ForeignKey(TipoSize, blank=True, null=True, on_delete=models.CASCADE)
