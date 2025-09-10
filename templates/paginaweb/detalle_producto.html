@@ -20,7 +20,47 @@
             border-radius: 6px;  /* opcional, esquinas redondeadas */
         }
 
+        .color-options {
+          display: flex;
+          gap: 1px;
+          list-style: none;
+          padding: 0;
+        }
+        .color-options input[type="radio"] {
+          display: none;
+        }
+        .color-circle {
+          display: inline-block;
+          width: 25px;
+          height: 25px;
+          border-radius: 10%;
+          border: 2px solid transparent;
+          cursor: pointer;
+          transition: transform 0.2s, border 0.2s;
+        }
+        .color-options input[type="radio"]:checked + .color-circle {
+          border: 2px solid black;
+          transform: scale(1.1);
+        }
+
     </style>
+
+    <script>
+        document.querySelectorAll(".color-options li a").forEach(a => {
+              a.addEventListener("click", e => {
+                e.preventDefault();
+                // quitar selección anterior
+                document.querySelectorAll(".color-options li a").forEach(el => el.classList.remove("selected"));
+                // marcar actual
+                a.classList.add("selected");
+
+                // aquí puedes guardar el color seleccionado
+                const selectedId = a.getAttribute("data-id");
+                console.log("Color seleccionado:", selectedId);
+                alert(selectedId);
+              });
+        });
+    </script>
 
 {% endblock %}
 
@@ -47,7 +87,7 @@
     <div class="product-details-area section-padding-lr-2 pb-115">
             <div class="container-fluid">
                 <div class="back-to-shop" data-aos="fade-up" data-aos-delay="200">
-                    <a href="shop.html"><img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/arrow-left-6.svg" alt=""> Back to Shop</a>
+                    <a href="/"><img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/arrow-left-6.svg" alt=""> Back to Shop</a>
                 </div>
                 <div class="row">
                     <div class="col-lg-7">
@@ -56,7 +96,7 @@
                                 {% for ximagen in dataproducto.imagenproducto %}
                                     <div class="easyzoom-style">
                                         <div class="easyzoom easyzoom--overlay">
-                                            <a href="#">
+                                             <a href="../turopamiestilo/media/{{ ximagen.imagen.url }}">
                                                 <img src="../turopamiestilo/media/{{ ximagen.imagen.url }}" alt="">
                                             </a>
                                         </div>
@@ -65,15 +105,9 @@
                             </div>
                             <div class="product-dec-slider-small product-dec-small-style1 ">
                                  {% for ximagen in dataproducto.imagenproducto %}
-                                     {% if forloop.first %}
-                                            <div class="product-dec-small active">
-                                                <img src="../turopamiestilo/media/{{ ximagen.imagen.url }}" alt="">
-                                            </div>
-                                     {% else %}
-                                            <div class="product-dec-small">
-                                                  <img src="../turopamiestilo/media/{{ ximagen.imagen.url }}" alt="">
-                                            </div>
-                                     {% endif %}
+                                        <div class="product-dec-small {% if forloop.fisrt  %} active {% endif %}" >
+                                            <img src="../turopamiestilo/media{{ ximagen.imagen.url }}" alt="">
+                                        </div>
                                  {% endfor %}
                             </div>
                         </div>
@@ -82,17 +116,17 @@
                         <div class="product-details-content product-details-mrg-left">
                             <div class="product-rating-stock-review" data-aos="fade-up" data-aos-delay="200">
                                 <div class="product-rating">
-                                    <a class="yellow" href="#"><img class="injectable" src="assets/images/icon-img/star-gray-full.svg" alt=""></a>
-                                    <a class="yellow" href="#"><img class="injectable" src="assets/images/icon-img/star-gray-full.svg" alt=""></a>
-                                    <a class="yellow" href="#"><img class="injectable" src="assets/images/icon-img/star-gray-full.svg" alt=""></a>
-                                    <a class="yellow-half" href="#"><img class="injectable" src="assets/images/icon-img/star-gray-half.svg" alt=""></a>
-                                    <a class="gray" href="#"><img class="injectable" src="assets/images/icon-img/star-gray-full.svg" alt=""></a>
+                                    <a class="yellow" href="#"><img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/star-gray-full.svg" alt=""></a>
+                                    <a class="yellow" href="#"><img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/star-gray-full.svg" alt=""></a>
+                                    <a class="yellow" href="#"><img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/star-gray-full.svg" alt=""></a>
+                                    <a class="yellow-half" href="#"><img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/star-gray-half.svg" alt=""></a>
+                                    <a class="gray" href="#"><img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/star-gray-full.svg" alt=""></a>
                                 </div>
                                 <div class="product-review">
                                     <span>5  Reviews</span>
                                 </div>
                                 <div class="product-stock">
-                                    <a href="#"><img src="assets/images/icon-img/check-circle.svg" alt=""></a>
+                                    <a href="#"><img src="/turopamiestilo/static/paginaweb/assets/images/icon-img/check-circle.svg" alt=""></a>
                                     <span>In Stock</span>
                                 </div>
                             </div>
@@ -111,10 +145,13 @@
                             </div>
                             <div class="product-details-color clearfix" data-aos="fade-up" data-aos-delay="600">
                                 <span>Seleccionar el Color</span>
-                                <ul>
+                                <ul class="color-options">
                                     {% for xcolor in dataproducto.colorproducto %}
                                         <li>
-                                            <a style="background-color: {{ xcolor.color }};" href="#"></a>
+                                            <label>
+                                                <input type="radio" name="color" onclick="cambiocolor(parseInt({{ xcolor.id }}))" value="{{ xcolor.id }}">
+                                                <span class="color-circle" style="background-color: {{ xcolor.color }};"></span>
+                                            </label>
                                         </li>
                                     {% endfor %}
                                 </ul>
@@ -130,13 +167,13 @@
                             <div class="product-details-wishlist-compare" data-aos="fade-up" data-aos-delay="300">
                                 <div class="product-details-wishlist">
                                     <a href="#">
-                                        <img class="injectable" src="assets/images/icon-img/heart-2.svg" alt="">
+                                        <img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/heart-2.svg" alt="">
                                         Add to wishlist
                                     </a>
                                 </div>
                                 <div class="product-details-compare">
                                     <a href="#">
-                                        <img class="injectable" src="assets/images/icon-img/compare.svg" alt="">
+                                        <img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/compare.svg" alt="">
                                         ADD TO COMPARE
                                     </a>
                                 </div>
@@ -172,9 +209,9 @@
                                 </div>
                             </div>
                             <div class="product-details-social" data-aos="fade-up" data-aos-delay="500">
-                                <a class="facebook" href="#"><img class="injectable" src="assets/images/icon-img/facebook.svg" alt=""></a>
-                                <a class="twitter" href="#"><img class="injectable" src="assets/images/icon-img/twitter.svg" alt=""></a>
-                                <a class="pinterest" href="#"><img class="injectable" src="assets/images/icon-img/pinterest.svg" alt=""></a>
+                                <a class="facebook" href="#"><img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/facebook.svg" alt=""></a>
+                                <a class="twitter" href="#"><img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/twitter.svg" alt=""></a>
+                                <a class="pinterest" href="#"><img class="injectable" src="/turopamiestilo/static/paginaweb/assets/images/icon-img/pinterest.svg" alt=""></a>
                             </div>
                         </div>
                     </div>

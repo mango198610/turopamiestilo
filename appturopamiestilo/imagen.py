@@ -27,7 +27,8 @@ def view(request):
                         client_address = ip_client_address(request)
                         producto=Producto.objects.get(id=int(request.POST.get('idproducto')))
 
-                        imagendata = ImagenProducto(nombre=str(request.POST['txtnombre']).upper(),producto=producto,orden=int(request.POST.get('cmborden')))
+                        imagendata = ImagenProducto(nombre=str(request.POST['txtnombre']).upper(),producto=producto,orden=int(request.POST.get('cmborden')),
+                                                    color=str(request.POST.get('txtcolor')))
 
 
                     else:
@@ -94,6 +95,7 @@ def view(request):
                             'nombre': str(d.nombre).upper(),
                             'orden': d.orden,
                             'imagen': htmimagen,
+                            'color': '<span class="btn"  style="background: '+ d.color +' ;color: white;cursor: context-menu" data-bgcolor="#FA1D06" data-color="#ffffff" ></span>',
                             'estado': htmlestado,
                               'acciones': f'''
                                         <div class="dropdown">

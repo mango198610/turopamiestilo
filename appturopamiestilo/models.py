@@ -318,6 +318,7 @@ class ImagenProducto(models.Model):
     orden = models.PositiveIntegerField(default=0)
     producto = models.ForeignKey(Producto, blank=True, null=True, on_delete=models.CASCADE)
     imagen=models.FileField(upload_to="imagen_producto/", blank=True, null=True)
+    color = models.CharField(max_length=1000, null=True)
     estado = models.BooleanField(default=True)
 
 
